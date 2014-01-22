@@ -3,7 +3,7 @@ Extension to add Google **Universal Analytics.js** tracking code (`ga()`) to you
 
 **Note:** This requires an [upgrade of your Google Analytics account](https://developers.google.com/analytics/devguides/collection/upgrade/)
 if it is still running with an older setup, and is **not** compatible with the older `_gaq` code (though you may run them simultaneously).
-Please see the official [Google Universal Analytics](https://developers.google.com/analytics/devguides/collection/AnalyticsJS/)
+Please see the official [Google Universal Analytics](https://developers.google.com/analytics/devguides/collection/analyticsjs/)
 site for more information.
 
 It includes tracking for all external links & "assets" downloads using "events" in Google Analytics (optional).
