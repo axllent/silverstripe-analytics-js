@@ -1,6 +1,6 @@
 {
 	"name": "axllent/silverstripe-analytics.js",
-	"description": "Google Universal Analytics.js extension for SilverStripe 3",
+	"description": "Google Universal Analytics.js tracking code for SilverStripe 3",
 	"type": "silverstripe-module",
 	"homepage": "https://github.com/axllent/silverstripe-analytics.js",
 	"keywords": ["silverstripe", "analytics", "googleanalytics", "tracking"],
