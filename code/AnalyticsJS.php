@@ -95,7 +95,7 @@ class AnalyticsJS extends Extension {
 				}
 				if (in_array($tname, self::$tracker_names)) {
 					$ufname = ($tname === false) ? 'Default' : $tname;
-					trigger_error('GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use name', E_USER_ERROR);
+					trigger_error('GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use name', E_USER_WARNING);
 					return false;
 				}
 				else {
