@@ -26,6 +26,7 @@ class AnalyticsJS extends Extension {
 	protected static $tracker_config = array();
 	protected static $ga_trackers = false;
 	protected static $tracker_names = array();
+	protected static $ga_configs = array();
 	protected static $tracker_counter = 1;
 
 	/*
@@ -84,23 +85,39 @@ class AnalyticsJS extends Extension {
 
 			if ($conf[0] == 'create') {
 				$tname = false;
-				if ($skip_tracking) {
-					$conf[1] = preg_replace('/[0-9]{4,}-[0-9]+/', 'DEV-' . self::$tracker_counter++, $conf[1]);
-				}
+
 				foreach ($conf as $i) {
 					if (is_array($i) && isset($i['name'])) {
 						$tname = $i['name'] . '.';
 						break;
 					}
 				}
-				if (in_array($tname, self::$tracker_names)) {
-					$ufname = ($tname === false) ? 'Default' : $tname;
-					trigger_error('GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use name', E_USER_WARNING);
+
+				$ufname = ($tname === false) ? 'Default' : $tname;
+
+				/* check if config has already been set (or _config.php has been run a second time) */
+				if (isset(self::$ga_configs[$ufname])) {
+					/* no unique name has been specified for additional tracker */
+					if (self::$ga_configs[$ufname] != $conf[1]) {
+						trigger_error(
+							'GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use unique name eg: ' .
+							'AnalyticsJS::add_ga("create", "UA-12345679-1", "auto", array("name" => "hehe"));',
+							E_USER_WARNING
+						);
+					}
 					return false;
 				}
 				else {
-					array_push(self::$tracker_names, $tname);
+					self::$ga_configs[$ufname] = $conf[1];
 				}
+
+				/* Replace Tracker IDs with fake ones if not in LIVE mode */
+				if ($skip_tracking) {
+					$conf[1] = preg_replace('/[0-9]{4,}-[0-9]+/', 'DEV-' . self::$tracker_counter++, $conf[1]);
+				}
+
+				array_push(self::$tracker_names, $tname);
+
 			}
 
 			foreach ($conf as $i) {
