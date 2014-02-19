@@ -101,7 +101,7 @@ class AnalyticsJS extends Extension {
 					if (self::$ga_configs[$ufname] != $conf[1]) {
 						trigger_error(
 							'GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use unique name eg: ' .
-							'AnalyticsJS::add_ga("create", "UA-12345679-1", "auto", array("name" => "hehe"));',
+							'AnalyticsJS::add_ga("create", "UA-12345679-1", "auto", array("name" => "MyOtherTracker"));',
 							E_USER_WARNING
 						);
 					}
