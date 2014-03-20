@@ -221,7 +221,7 @@ class AnalyticsJS extends Extension {
 		}
 
 		/* Attach click event to document */
-		var d = document;
+		var d = document.body;
 		d.addEventListener ? d.addEventListener("click",_guaLt,!1) : d.attachEvent && d.attachEvent("onclick",_guaLt);';
 
 		Requirements::customScript($this->compressGUACode($js));
