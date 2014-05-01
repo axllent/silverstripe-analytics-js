@@ -142,16 +142,16 @@ class AnalyticsJS extends Extension {
 			return false;
 		}
 
-		$statusCode = Controller::curr()->getResponse()->getStatusCode();
+		$ErrorCode = Controller::curr()->ErrorCode;
 
-		if ($statusCode == 404 || $statusCode == 500) {
-			$ecode = ($statusCode == 404) ? 'Page Not Found' : 'Page Error';
+		if ($ErrorCode == 404 || $ErrorCode == 500) {
+			$ecode = ($ErrorCode == 404) ? 'Page Not Found' : 'Page Error';
 			foreach (self::$tracker_names as $t) {
-				self::$ga_trackers .= self::$global_name . '("'. $t .'send","event","' . $ecode . '",d.location.pathname+d.location.search,d.referrer);'."\n";
+				self::$ga_trackers .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",document.location.pathname+document.location.search,document.referrer);'."\n";
 			}
 		} else {
 			foreach (self::$tracker_names as $t) {
-				self::$ga_trackers .= self::$global_name . '("'. $t .'send","pageview");'."\n";
+				self::$ga_trackers .= self::$global_name . '("' . $t . 'send","pageview");' . "\n";
 			}
 		}
 
