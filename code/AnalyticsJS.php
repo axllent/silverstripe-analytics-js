@@ -144,8 +144,8 @@ class AnalyticsJS extends Extension {
 
 		$ErrorCode = Controller::curr()->ErrorCode;
 
-		if ($ErrorCode == 404 || $ErrorCode == 500) {
-			$ecode = ($ErrorCode == 404) ? 'Page Not Found' : 'Page Error';
+		if ($ErrorCode) {
+			$ecode = ($ErrorCode == 404) ? '404 Page Not Found' : $ErrorCode . ' Page Error';
 			foreach (self::$tracker_names as $t) {
 				self::$ga_trackers .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",document.location.pathname+document.location.search,document.referrer);'."\n";
 			}
