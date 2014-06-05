@@ -1,4 +1,5 @@
-# Google Universal Analytics.js tracking code for SilverStripe 3
+Google Universal Analytics.js tracking code for SilverStripe 3
+--------------------------------------------------------------
 Extension to add Google **Universal Analytics.js** tracking code (`ga()`) to your SilverStripe templates.
 
 **Note:** This requires an [upgrade of your Google Analytics account](https://developers.google.com/analytics/devguides/collection/upgrade/)
@@ -26,10 +27,15 @@ to prevent bad data.
 
 ## Usage
 The extension is automatically loaded if you provide at least one tracking account in your `mysite/_config.php`
-<pre>AnalyticsJS::add_ga('create', 'UA-1234567-1', 'auto');</pre>
+
+```php
+AnalyticsJS::add_ga('create', 'UA-1234567-1', 'auto');
+```
+
 The syntax is very similar to the official documentation, so things like secondary trackers or other
 configurations can be passed as follows:
-<pre>
+
+```php
 // Add main tracker
 AnalyticsJS::add_ga('create', 'UA-1234567-1', 'auto');
 
@@ -44,7 +50,10 @@ AnalyticsJS::add_ga('set', 'forceSSL', true);
 
 // Disable link tracking
 AnalyticsJS::$track_links = false;
-</pre>
+```
 
 To start live tracking, make sure your website is in `live` mode
-<pre>define('SS_ENVIRONMENT_TYPE', 'live');</pre>
+
+```php
+define('SS_ENVIRONMENT_TYPE', 'live');
+```
