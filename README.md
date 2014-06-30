@@ -1,5 +1,6 @@
 Google Universal Analytics.js tracking code for SilverStripe 3
---------------------------------------------------------------
+==============================================================
+
 Extension to add Google **Universal Analytics.js** tracking code (`ga()`) to your SilverStripe templates.
 
 **Note:** This requires an [upgrade of your Google Analytics account](https://developers.google.com/analytics/devguides/collection/upgrade/)
