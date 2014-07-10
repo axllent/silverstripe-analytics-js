@@ -142,16 +142,18 @@ class AnalyticsJS extends Extension {
 			return false;
 		}
 
+		$ga_insert = false;
+
 		$ErrorCode = Controller::curr()->ErrorCode;
 
 		if ($ErrorCode) {
 			$ecode = ($ErrorCode == 404) ? '404 Page Not Found' : $ErrorCode . ' Page Error';
 			foreach (self::$tracker_names as $t) {
-				self::$ga_trackers .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",document.location.pathname+document.location.search,document.referrer);'."\n";
+				$ga_insert .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",document.location.pathname+document.location.search,document.referrer);'."\n";
 			}
 		} else {
 			foreach (self::$tracker_names as $t) {
-				self::$ga_trackers .= self::$global_name . '("' . $t . 'send","pageview");' . "\n";
+				$ga_insert .= self::$global_name . '("' . $t . 'send","pageview");' . "\n";
 			}
 		}
 
@@ -159,7 +161,7 @@ class AnalyticsJS extends Extension {
 			'(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),' . "\n" .
 			'm=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)' . "\n" .
 			'})(window,document,"script","//www.google-analytics.com/analytics.js","' . self::$global_name . '");' . "\n" .
-			self::$ga_trackers;
+			self::$ga_trackers.$ga_insert;
 
 		Requirements::insertHeadTags('<script type="text/javascript">//<![CDATA[' . "\n" . $this->compressGUACode($headerscript) . "\n" . '//]]></script>');
 
