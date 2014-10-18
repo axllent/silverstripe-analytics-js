@@ -25,7 +25,7 @@ to prevent bad data capture.
 * Adds the GA "nonInteraction" flag to outgoing links that open in new window (`target`) as well as downloads to not impact your bounce rate.
 
 ## Notes
-* Only tracking of "left mouse clicks" works. Tracking is bypassed is the user right-clicks on a link and selects an action from the context menu
+* Only tracking of left-clicks works. Tracking is bypassed if the user right-clicks on a link and selects an action from the context menu
 (open in new tab, save as etc...). Unfortunately there seems to be no way around this.
 * All clicks on outbound links that open in a new window (`target`) are not considered bounces as your page remains open in the previous window.
 Only external links that open in the same window get counted towards the bounce rate.
