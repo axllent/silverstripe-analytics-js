@@ -149,7 +149,7 @@ class AnalyticsJS extends Extension {
 		if ($ErrorCode) {
 			$ecode = ($ErrorCode == 404) ? '404 Page Not Found' : $ErrorCode . ' Page Error';
 			foreach (self::$tracker_names as $t) {
-				$ga_insert .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",document.location.pathname+document.location.search,document.referrer);'."\n";
+				$ga_insert .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",window.location.pathname+window.location.search,window.referrer);'."\n";
 			}
 		} else {
 			foreach (self::$tracker_names as $t) {
@@ -170,8 +170,6 @@ class AnalyticsJS extends Extension {
 
 	/*
 	 * Generate and inject customScript() JavaScript link-tracking code
-	 * @param null
-	 * @return FieldSet
 	 */
 	protected function generateUniversalAnalyticsLinkCode() {
 
@@ -182,50 +180,60 @@ class AnalyticsJS extends Extension {
 		$trackers = '';
 
 		foreach (self::$tracker_names as $t) {
-			$trackers .= self::$global_name . '("'. $t .'send","event",c,a,l);';
+			$trackers .= self::$global_name . '("'. $t .'send","event",c,a,l,{"hitCallback":hb(h,t),"nonInteraction":ni});';
 		}
 
-
+		/*
+		 * JavaScript code for link tracking
+		 */
 		$js = 'function _guaLt(event){
-		var el = event.srcElement || event.target;
+			var el = event.srcElement || event.target;
 
 			/* Loop through parent elements if clicked element is not a link (ie: <a><img /></a> */
 			while(el && (typeof el.tagName == "undefined" || el.tagName.toLowerCase() != "a" || !el.href))
 				el = el.parentNode;
 
 			if(el && el.href){
-				dl = document.location;
-				l = dl.pathname + dl.search;
-				h = el.href;
-				c = !1;
+				var l = window.pathname + window.search;
+				var h = el.href;
+				var c = !1;
+				var t = el.target; /* new window? */
+				var ni = 1; /* count as bounce */
+
+				if(!t || t.match(/^_(self|parent|top)$/i)){
+					t = !1; /* unset target */
+					ni = 0; /* calculate outgoing link as bounce */
+				}
+
+				/* if external link then track event as "Outgoing Links" */
 				if(h.indexOf(location.host) == -1){
 					c = "Outgoing Links";
 					a = h;
 				}
+
+				/* else if /assets/ (not images) track as "Downloads" */
 				else if(h.match(/\/assets\//) && !h.match(/\.(jpe?g|bmp|png|gif|tiff?)$/i)){
 					c = "Downloads";
 					a = h.match(/\/assets\/(.*)/)[1];
-				}
-				if(c){
-					/* Add trackers */
-					' . $trackers . '
-					/* If target not set delay opening of window by 0.5s to allow tracking */
-					if(!el.target || el.target.match(/^_(self|parent|top)$/i)){
-						setTimeout(function(){
-							document.location.href = el.href;
-						}.bind(el),500);
-						/* Prevent standard click */
-						event.preventDefault ? event.preventDefault() : event.returnValue = !1;
-					}
+					ni = 1; /* do not count as bounce */
 				}
 
+				if(c){
+					/* hitCallback function for GA */
+					var hb = function(u,t){
+						t ? window.open(u,t) : window.location.href = u;
+					};
+					/* Add GA tracker(s) */
+					' . $trackers . '
+					/* prevent default action */
+					event.preventDefault ? event.preventDefault() : event.returnValue = !1;
+				}
 			}
 		}
 
 		/* Attach the event to all clicks in the document after page has loaded */
-		var w = window;
-		w.addEventListener ? w.addEventListener("load",function(){document.body.addEventListener("click",_guaLt,!1)},!1)
-		 : w.attachEvent && w.attachEvent("onload",function(){document.body.attachEvent("onclick",_guaLt)});';
+		window.addEventListener ? document.body.addEventListener("click",_guaLt,!1)
+		 : window.attachEvent && document.body.attachEvent("onclick",_guaLt);';
 
 		Requirements::customScript($this->compressGUACode($js));
 
@@ -233,7 +241,7 @@ class AnalyticsJS extends Extension {
 
 	/*
 	 * Compress inline JavaScript
-	 * @param str data
+	 * @param str
 	 * @return str
 	 */
 	protected function compressGUACode($data) {
