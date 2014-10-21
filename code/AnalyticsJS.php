@@ -194,8 +194,10 @@ class AnalyticsJS extends Extension {
 				el = el.parentNode;
 
 			if(el && el.href){
-				var l = window.pathname + window.search;
+				var dl = document.location;
+				var l = dl.pathname + dl.search;
 				var h = el.href;
+				var a = h;
 				var c = !1;
 				var t = el.target; /* new window? */
 				var ni = 1; /* count as bounce */
@@ -208,7 +210,6 @@ class AnalyticsJS extends Extension {
 				/* if external link then track event as "Outgoing Links" */
 				if(h.indexOf(location.host) == -1){
 					c = "Outgoing Links";
-					a = h;
 				}
 
 				/* else if /assets/ (not images) track as "Downloads" */
