@@ -207,8 +207,20 @@ class AnalyticsJS extends Extension {
 					ni = 0; /* calculate outgoing link as bounce */
 				}
 
+				/* telephone links */
+				if(h.match(/^tel\:/i)){
+					c = "Phone";
+					a = h.replace(/\D/g,"");
+				}
+
+				/* email links */
+				else if(h.match(/^mailto\:/i)){
+					c = "Email";
+					a = h.slice(7);
+				}
+
 				/* if external link then track event as "Outgoing Links" */
-				if(h.indexOf(location.host) == -1){
+				else if(h.indexOf(location.host) == -1){
 					c = "Outgoing Links";
 				}
 
@@ -224,8 +236,10 @@ class AnalyticsJS extends Extension {
 					var hb = function(u,t){
 						t ? window.open(u,t) : window.location.href = u;
 					};
+
 					/* Add GA tracker(s) */
 					' . $trackers . '
+
 					/* prevent default action */
 					event.preventDefault ? event.preventDefault() : event.returnValue = !1;
 				}
