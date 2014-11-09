@@ -209,13 +209,19 @@ class AnalyticsJS extends Extension {
 
 				/* telephone links */
 				if(h.match(/^tel\:/i)){
-					c = "Phone";
+					c = "Phone Links";
+					a = h.replace(/\D/g,"");
+				}
+
+				/* sms links */
+				else if(h.match(/^sms\:/i)){
+					c = "SMS Links";
 					a = h.replace(/\D/g,"");
 				}
 
 				/* email links */
 				else if(h.match(/^mailto\:/i)){
-					c = "Email";
+					c = "Email Links";
 					a = h.slice(7);
 				}
 
