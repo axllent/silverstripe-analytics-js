@@ -225,8 +225,8 @@ class AnalyticsJS extends Extension {
 					a = h.slice(7);
 				}
 
-				/* if external link then track event as "Outgoing Links" */
-				else if(h.indexOf(location.host) == -1){
+				/* if external (and not JS) link then track event as "Outgoing Links" */
+				else if(h.indexOf(location.host) == -1 && !h.match(/^javascript\:/i)){
 					c = "Outgoing Links";
 				}
 
