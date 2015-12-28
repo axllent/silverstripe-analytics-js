@@ -18,32 +18,15 @@ class AnalyticsJS extends Extension
     /* Whether to track outbound links & assets downloads */
     public static $track_links = true;
 
-    /* Ignore tracking pages with ?flush=[?] */
-    public static $ignore_flushes = true;
-
     /* Whether to compress the JavaScript */
     public static $compress_js = true;
+
 
     protected static $tracker_config = array();
     protected static $ga_trackers = false;
     protected static $tracker_names = array();
     protected static $ga_configs = array();
     protected static $tracker_counter = 1;
-
-    /*
-     * Statically add Universal Analytics configs
-     * @param array (see README.md)
-     * @return null
-     */
-    public static function add_ga()
-    {
-        $arg_list = func_get_args();
-        if (count($arg_list) < 2) {
-            trigger_error('GaTracker::add_ga() requires at least two arguments', E_USER_ERROR);
-            return false;
-        }
-        array_push(self::$tracker_config, $arg_list);
-    }
 
     /*
      * Automatically initiate the code
@@ -69,19 +52,32 @@ class AnalyticsJS extends Extension
 
 
     /*
-     * Parse static config array
-     * Sets static self::$tracker_names array
-     * Sets static self::$ga_trackers code
+     * Parse configs including yaml & static
      * @param null
      * @return null
      */
     protected function parseGoogleUniversalAnalyticsConfigs()
     {
+        /* Set trackers from yaml */
+        if ($trackers = Config::inst()->get('AnalyticsJS', 'tracker')) {
+            foreach ($trackers as $tracker) {
+                array_push(self::$tracker_config, $tracker);
+            }
+        }
+        /* return false if no trackers are set */
         if (count(self::$tracker_config) == 0) {
             return false;
         }
+        /* set GA global name, typically "ga" */
+        if ($global_name = Config::inst()->get('AnalyticsJS', 'global_name')) {
+            self::$global_name = $global_name;
+        }
 
-        $skip_tracking = (!Director::isLive() || (self::$ignore_flushes && isset($_GET['flush']))) ? true : false;
+        if (!$compress_js = Config::inst()->get('AnalyticsJS', 'compress_js')) {
+            self::$compress_js = false;
+        }
+
+        $skip_tracking = (!Director::isLive() || isset($_GET['flush'])) ? true : false;
 
         foreach (self::$tracker_config as $conf) {
             $args = array();
@@ -103,8 +99,7 @@ class AnalyticsJS extends Extension
                     /* no unique name has been specified for additional tracker */
                     if (self::$ga_configs[$ufname] != $conf[1]) {
                         trigger_error(
-                            'GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use unique name eg: ' .
-                            'AnalyticsJS::add_ga("create", "UA-12345679-1", "auto", array("name" => "MyOtherTracker"));',
+                            'GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use a unique name',
                             E_USER_WARNING
                         );
                     }
@@ -161,7 +156,7 @@ class AnalyticsJS extends Extension
             '(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),' . "\n" .
             'm=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)' . "\n" .
             '})(window,document,"script","//www.google-analytics.com/analytics.js","' . self::$global_name . '");' . "\n" .
-            self::$ga_trackers.$ga_insert;
+            self::$ga_trackers . $ga_insert;
 
         Requirements::insertHeadTags('<script type="text/javascript">//<![CDATA[' . "\n" . $this->compressGUACode($headerscript) . "\n" . '//]]></script>');
     }
@@ -172,7 +167,10 @@ class AnalyticsJS extends Extension
      */
     protected function generateUniversalAnalyticsLinkCode()
     {
-        if (!self::$track_links || count(self::$tracker_names) == 0) {
+        if (
+            !$track_links = Config::inst()->get('AnalyticsJS', 'track_links') ||
+            count(self::$tracker_names) == 0
+        ) {
             return false;
         }
 
@@ -197,7 +195,7 @@ class AnalyticsJS extends Extension
 				var l = dl.pathname + dl.search;
 				var h = el.href;
 				var a = h;
-				var c = !1;
+				var c = !1; /* false */
 				var t = el.target; /* new window? */
 				var ni = 1; /* count as bounce */
 
@@ -283,5 +281,22 @@ class AnalyticsJS extends Extension
             '/\s>\s?/' => '>',
         );
         return self::$compress_js ? preg_replace(array_keys($repl), array_values($repl), $data) : $data;
+    }
+
+    /*
+     * Statically add Universal Analytics configs
+     * Kept for backwards compatibility
+     * @param array (see README.md)
+     * @return null
+     */
+    public static function add_ga()
+    {
+        Deprecation::notice('3.2.0', 'Use the "AnalyticsJS.tracker" config setting instead');
+        $arg_list = func_get_args();
+        if (count($arg_list) < 2) {
+            trigger_error('GaTracker::add_ga() requires at least two arguments', E_USER_ERROR);
+            return false;
+        }
+        array_push(self::$tracker_config, $arg_list);
     }
 }
