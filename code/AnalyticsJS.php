@@ -168,8 +168,8 @@ class AnalyticsJS extends Extension
     protected function generateUniversalAnalyticsLinkCode()
     {
         if (
-            !$track_links = Config::inst()->get('AnalyticsJS', 'track_links') ||
-            count(self::$tracker_names) == 0
+            count(self::$tracker_names) == 0 ||
+            !$track_links = Config::inst()->get('AnalyticsJS', 'track_links')
         ) {
             return false;
         }
