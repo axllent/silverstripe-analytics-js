@@ -64,15 +64,18 @@ class AnalyticsJS extends Extension
                 array_push(self::$tracker_config, $tracker);
             }
         }
+
         /* return false if no trackers are set */
         if (count(self::$tracker_config) == 0) {
             return false;
         }
+
         /* set GA global name, typically "ga" */
         if ($global_name = Config::inst()->get('AnalyticsJS', 'global_name')) {
             self::$global_name = $global_name;
         }
 
+        /* compress inline JavaScript? */
         if (!$compress_js = Config::inst()->get('AnalyticsJS', 'compress_js')) {
             self::$compress_js = false;
         }
@@ -99,7 +102,7 @@ class AnalyticsJS extends Extension
                     /* no unique name has been specified for additional tracker */
                     if (self::$ga_configs[$ufname] != $conf[1]) {
                         trigger_error(
-                            'GaTracker::add_ga(): ' . $ufname .' Tracker already set, please use a unique name',
+                            'Tracker ' . $ufname .' already set, please use a unique name',
                             E_USER_WARNING
                         );
                     }
@@ -174,84 +177,103 @@ class AnalyticsJS extends Extension
             return false;
         }
 
-        $trackers = '';
+        $non_callbrack_trackers = '';
+        $callback_trackers = '';
 
         foreach (self::$tracker_names as $t) {
-            $trackers .= self::$global_name . '("'. $t .'send","event",c,a,l,{"hitCallback":hb(h,t),"nonInteraction":ni});';
+            $non_callbrack_trackers .= self::$global_name . '("'. $t .'send","event",c,a,l);';
+            $callback_trackers .= self::$global_name . '("'. $t .'send","event",c,a,l,{"hitCallback":hb});';
         }
 
         /*
          * JavaScript code for link tracking
          */
-        $js = 'function _guaLt(event){
-			var el = event.srcElement || event.target;
+        $js = 'function _guaLt(e){
 
-			/* Loop through parent elements if clicked element is not a link (ie: <a><img /></a> */
-			while(el && (typeof el.tagName == "undefined" || el.tagName.toLowerCase() != "a" || !el.href))
-				el = el.parentNode;
+            /* If GA is blocked or not loaded then abort */
+            if (
+                !' . self::$global_name . '.hasOwnProperty("loaded") ||
+                1 != ' . self::$global_name . '.loaded
+            ) return;
 
-			if(el && el.href){
-				var dl = document.location;
-				var l = dl.pathname + dl.search;
-				var h = el.href;
-				var a = h;
-				var c = !1; /* false */
-				var t = el.target; /* new window? */
-				var ni = 1; /* count as bounce */
+            var el = e.srcElement || e.target;
 
-				if(!t || t.match(/^_(self|parent|top)$/i)){
-					t = !1; /* unset target */
-					ni = 0; /* calculate outgoing link as bounce */
-				}
+            /* Loop through parent elements if clicked element is not a link (eg: <a><img /></a> */
+            while(el && (typeof el.tagName == "undefined" || el.tagName.toLowerCase() != "a" || !el.href)){
+                el = el.parentNode;
+            }
 
-				/* telephone links */
-				if(h.match(/^tel\:/i)){
-					c = "Phone Links";
-					a = h.replace(/\D/g,"");
-				}
+            if(el && el.href){
+                var dl = document.location;
+                var l = dl.pathname + dl.search; /* event label = referer */
+                var h = el.href; /* event link */
+                var a = h; /* clone link for processing */
+                var c = !1; /* event category */
+                var t = el.target; /* link target */
 
-				/* sms links */
-				else if(h.match(/^sms\:/i)){
-					c = "SMS Links";
-					a = h.replace(/\D/g,"");
-				}
+                /* telephone links */
+                if(h.match(/^tel\:/i)){
+                    c = "Phone Links";
+                    a = h.replace(/\D/g,"");
+                }
 
-				/* email links */
-				else if(h.match(/^mailto\:/i)){
-					c = "Email Links";
-					a = h.slice(7);
-				}
+                /* sms links */
+                else if(h.match(/^sms\:/i)){
+                    c = "SMS Links";
+                    a = h.replace(/\D/g,"");
+                }
 
-				/* if external (and not JS) link then track event as "Outgoing Links" */
-				else if(h.indexOf(location.host) == -1 && !h.match(/^javascript\:/i)){
-					c = "Outgoing Links";
-				}
+                /* email links */
+                else if(h.match(/^mailto\:/i)){
+                    c = "Email Links";
+                    a = h.slice(7);
+                }
 
-				/* else if /assets/ (not images) track as "Downloads" */
-				else if(h.match(/\/assets\//) && !h.match(/\.(jpe?g|bmp|png|gif|tiff?)$/i)){
-					c = "Downloads";
-					a = h.match(/\/assets\/(.*)/)[1];
-					ni = 1; /* do not count as bounce */
-				}
+                /* if external (and not JS) link then track event as "Outgoing Links" */
+                else if(h.indexOf(location.host) == -1 && !h.match(/^javascript\:/i)){
+                    c = "Outgoing Links";
+                }
 
-				if(c){
-					/* hitCallback function for GA */
-					var hb = function(u,t){
-						t ? window.open(u,t) : window.location.href = u;
-					};
+                /* else if /assets/ (not images) track as "Downloads" */
+                else if(h.match(/\/assets\//) && !h.match(/\.(jpe?g|bmp|png|gif|tiff?)$/i)){
+                    c = "Downloads";
+                    a = h.match(/\/assets\/(.*)/)[1];
+                }
 
-					/* Add GA tracker(s) */
-					' . $trackers . '
+                if(c){
+                    /* link opens in same window & requires callback */
+                    if(!t || t.match(/^_(self|parent|top)$/i)){
 
-					/* prevent default action */
-					event.preventDefault ? event.preventDefault() : event.returnValue = !1;
-				}
-			}
-		}
+                        var hbrun = false;
 
-		/* Attach the event to all clicks in the document after page has loaded */
-		window.addEventListener ? document.body.addEventListener("click",_guaLt,!1)
-		 : window.attachEvent && document.body.attachEvent("onclick",_guaLt);';
+                        /* hitCallback function for GA */
+                        var hb = function(){
+                            /* run once only */
+                            if(hbrun) return;
+                            hbrun = true;
+                            window.location.href = h;
+                        };
+
+                        /* Add GA tracker(s) */
+                        ' . $callback_trackers . '
+
+                        /* Run hitCallback function if GA takes too long */
+                        setTimeout(hb,1000);
+
+                        /* prevent default action (ie: click) */
+                        e.preventDefault ? e.preventDefault() : e.returnValue = !1;
+
+                    } else {
+                        /* link opens a new window already - just track */
+                        ' . $non_callbrack_trackers . '
+                    }
+                }
+            }
+        }
+
+        /* Attach the event to all clicks in the document after page has loaded */
+        window.addEventListener ? document.body.addEventListener("click",_guaLt,!1)
+         : window.attachEvent && document.body.attachEvent("onclick",_guaLt);';
 
         Requirements::customScript($this->compressGUACode($js));
     }
@@ -265,7 +287,7 @@ class AnalyticsJS extends Extension
     {
         $repl = array(
             '!/\*[^*]*\*+([^/][^*]*\*+)*/!' => '', // Comments
-            '/(\n|\t)/' => '',
+            '/(    |\n)/' => '', // soft tabs / new lines
             '/\s?=\s?/' => '=',
             '/\s?==\s?/' => '==',
             '/\s?!=\s?/' => '!=',
@@ -278,7 +300,7 @@ class AnalyticsJS extends Extension
             '/\s?\)\s?/' => ')',
             '/\s?\|\s?/' => '|',
             '/\s<\s?/' => '<',
-            '/\s>\s?/' => '>',
+            '/\s>\s?/' => '>'
         );
         return self::$compress_js ? preg_replace(array_keys($repl), array_values($repl), $data) : $data;
     }
@@ -291,7 +313,7 @@ class AnalyticsJS extends Extension
      */
     public static function add_ga()
     {
-        Deprecation::notice('3.2.0', 'Use the "AnalyticsJS.tracker" config setting instead');
+        Deprecation::notice('3.2.0', 'Use the "AnalyticsJS.tracker" yaml config instead');
         $arg_list = func_get_args();
         if (count($arg_list) < 2) {
             trigger_error('GaTracker::add_ga() requires at least two arguments', E_USER_ERROR);
