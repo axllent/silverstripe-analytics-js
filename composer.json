@@ -1,8 +1,8 @@
 {
-	"name": "axllent/silverstripe-analytics.js",
-	"description": "Google Universal Analytics.js tracking code for SilverStripe 3",
+	"name": "axllent/silverstripe-analytics-js",
+	"description": "Google Universal Analytics.js tracking code for SilverStripe",
 	"type": "silverstripe-module",
-	"homepage": "https://github.com/axllent/silverstripe-analytics.js",
+	"homepage": "https://github.com/axllent/silverstripe-analytics-js",
 	"keywords": ["silverstripe", "analytics", "googleanalytics", "tracking"],
 	"license": "The MIT License (MIT)",
 	"authors": [
@@ -12,7 +12,7 @@
 		}
 	],
 	"support": {
-		"issues": "https://github.com/axllent/silverstripe-analytics.js/issues"
+		"issues": "https://github.com/axllent/silverstripe-analytics-js/issues"
 	},
 	"require": {
 		"silverstripe/framework": "3.*"

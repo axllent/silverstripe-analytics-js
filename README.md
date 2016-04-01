@@ -1,4 +1,4 @@
-# Google Universal Analytics.js tracking code for SilverStripe 3
+# Google Universal Analytics-js tracking code for SilverStripe 3
 An extension to add Google **Universal Analytics.js** tracking code (`ga()`) to your SilverStripe templates.
 
 It automatically includes unobtrustive Google Analytics **event tracking** for all outbound (external) links & "asset downloads" (optional), as well as event tracking for error pages (eg: 404).
