@@ -13,14 +13,7 @@ class AnalyticsJS extends Extension
 {
 
     /* Name of the Google Analytics object */
-    public static $global_name = 'ga';
-
-    /* Whether to track outbound links & assets downloads */
-    public static $track_links = true;
-
-    /* Whether to compress the JavaScript */
-    public static $compress_js = true;
-
+    private static $global_name = 'ga';
 
     protected static $tracker_config = array();
     protected static $ga_trackers = false;
@@ -43,23 +36,24 @@ class AnalyticsJS extends Extension
     protected function injectGoogleUniversalAnalyticsCode()
     {
         /* Parse static configs */
-            $this->parseGoogleUniversalAnalyticsConfigs();
+            $this->parseAnalyticsConfigs();
             /* Generate header code with configs */
-            $this->genUniversalAnalyticsCode();
+            $this->genAnalyticsCodeTrackingCode();
             /* Add link tracking code */
-            $this->generateUniversalAnalyticsLinkCode();
+            $this->genLinkTrackingCode();
     }
 
 
     /*
-     * Parse configs including yaml & static
+     * Parse configs
      * @param null
      * @return null
      */
-    protected function parseGoogleUniversalAnalyticsConfigs()
+    protected function parseAnalyticsConfigs()
     {
+        $this->config = Config::inst();
         /* Set trackers from yaml */
-        if ($trackers = Config::inst()->get('AnalyticsJS', 'tracker')) {
+        if ($trackers = $this->config->get('AnalyticsJS', 'tracker')) {
             foreach ($trackers as $tracker) {
                 array_push(self::$tracker_config, $tracker);
             }
@@ -71,14 +65,7 @@ class AnalyticsJS extends Extension
         }
 
         /* set GA global name, typically "ga" */
-        if ($global_name = Config::inst()->get('AnalyticsJS', 'global_name')) {
-            self::$global_name = $global_name;
-        }
-
-        /* compress inline JavaScript? */
-        if (!$compress_js = Config::inst()->get('AnalyticsJS', 'compress_js')) {
-            self::$compress_js = false;
-        }
+        self::$global_name = $this->config->get('AnalyticsJS', 'global_name');
 
         $skip_tracking = (!Director::isLive() || isset($_GET['flush'])) ? true : false;
 
@@ -129,12 +116,12 @@ class AnalyticsJS extends Extension
 
 
     /*
-     * Generates <head> and inject insertHeadTags() JavaScript code
+     * Generates and inject insertHeadTags() JavaScript code into <head>
      * for tracking if at least one tracking config has been specified
      * @param null
      * @return null
      */
-    protected function genUniversalAnalyticsCode()
+    protected function genAnalyticsCodeTrackingCode()
     {
         if (count(self::$tracker_names) == 0) {
             return false;
@@ -145,7 +132,10 @@ class AnalyticsJS extends Extension
         $ErrorCode = Controller::curr()->ErrorCode;
 
         if ($ErrorCode) {
-            $ecode = ($ErrorCode == 404) ? '404 Page Not Found' : $ErrorCode . ' Page Error';
+            $ecode = ($ErrorCode == 404) ?
+                $this->config->get('AnalyticsJS', '404_category')
+                : $ErrorCode . $this->config->get('AnalyticsJS', 'error_category');
+
             foreach (self::$tracker_names as $t) {
                 $ga_insert .= self::$global_name . '("' . $t . 'send","event","' . $ecode . '",window.location.pathname+window.location.search,window.referrer);'."\n";
             }
@@ -168,11 +158,11 @@ class AnalyticsJS extends Extension
     /*
      * Generate and inject customScript() JavaScript link-tracking code
      */
-    protected function generateUniversalAnalyticsLinkCode()
+    protected function genLinkTrackingCode()
     {
         if (
             count(self::$tracker_names) == 0 ||
-            !$track_links = Config::inst()->get('AnalyticsJS', 'track_links')
+            !$this->config->get('AnalyticsJS', 'track_links')
         ) {
             return false;
         }
@@ -185,95 +175,15 @@ class AnalyticsJS extends Extension
             $callback_trackers .= self::$global_name . '("'. $t .'send","event",c,a,l,{"hitCallback":hb});';
         }
 
-        /*
-         * JavaScript code for link tracking
-         */
-        $js = 'function _guaLt(e){
-
-            /* If GA is blocked or not loaded then abort */
-            if (
-                !' . self::$global_name . '.hasOwnProperty("loaded") ||
-                1 != ' . self::$global_name . '.loaded
-            ) return;
-
-            var el = e.srcElement || e.target;
-
-            /* Loop through parent elements if clicked element is not a link (eg: <a><img /></a> */
-            while(el && (typeof el.tagName == "undefined" || el.tagName.toLowerCase() != "a" || !el.href)){
-                el = el.parentNode;
-            }
-
-            if(el && el.href){
-                var dl = document.location;
-                var l = dl.pathname + dl.search; /* event label = referer */
-                var h = el.href; /* event link */
-                var a = h; /* clone link for processing */
-                var c = !1; /* event category */
-                var t = el.target; /* link target */
-
-                /* telephone links */
-                if(h.match(/^tel\:/i)){
-                    c = "Phone Links";
-                    a = h.replace(/\D/g,"");
-                }
-
-                /* sms links */
-                else if(h.match(/^sms\:/i)){
-                    c = "SMS Links";
-                    a = h.replace(/\D/g,"");
-                }
-
-                /* email links */
-                else if(h.match(/^mailto\:/i)){
-                    c = "Email Links";
-                    a = h.slice(7);
-                }
-
-                /* if external (and not JS) link then track event as "Outgoing Links" */
-                else if(h.indexOf(location.host) == -1 && !h.match(/^javascript\:/i)){
-                    c = "Outgoing Links";
-                }
-
-                /* else if /assets/ (not images) track as "Downloads" */
-                else if(h.match(/\/assets\//) && !h.match(/\.(jpe?g|bmp|png|gif|tiff?)$/i)){
-                    c = "Downloads";
-                    a = h.match(/\/assets\/(.*)/)[1];
-                }
-
-                if(c){
-                    /* link opens in same window & requires callback */
-                    if(!t || t.match(/^_(self|parent|top)$/i)){
-
-                        var hbrun = false;
-
-                        /* hitCallback function for GA */
-                        var hb = function(){
-                            /* run once only */
-                            if(hbrun) return;
-                            hbrun = true;
-                            window.location.href = h;
-                        };
-
-                        /* Add GA tracker(s) */
-                        ' . $callback_trackers . '
-
-                        /* Run hitCallback function if GA takes too long */
-                        setTimeout(hb,1000);
-
-                        /* prevent default action (ie: click) */
-                        e.preventDefault ? e.preventDefault() : e.returnValue = !1;
-
-                    } else {
-                        /* link opens a new window already - just track */
-                        ' . $non_callbrack_trackers . '
-                    }
-                }
-            }
-        }
-
-        /* Attach the event to all clicks in the document after page has loaded */
-        window.addEventListener ? document.body.addEventListener("click",_guaLt,!1)
-         : window.attachEvent && document.body.attachEvent("onclick",_guaLt);';
+        $js = $this->owner->customise(ArrayData::create(array(
+            'GlobalName' => self::$global_name,
+            'CallbackTrackers' => $callback_trackers,
+            'NonCallbackTrackers' => $non_callbrack_trackers,
+            'LinkCategory' => $this->config->get('AnalyticsJS', 'link_category'),
+            'EmailCategory' => $this->config->get('AnalyticsJS', 'email_category'),
+            'PhoneCategory' => $this->config->get('AnalyticsJS', 'phone_category'),
+            'DownloadsCategory' => $this->config->get('AnalyticsJS', 'downloads_category'),
+        )))->renderWith('OutboundLinkTracking');
 
         Requirements::customScript($this->compressGUACode($js));
     }
@@ -302,13 +212,15 @@ class AnalyticsJS extends Extension
             '/\s<\s?/' => '<',
             '/\s>\s?/' => '>'
         );
-        return self::$compress_js ? preg_replace(array_keys($repl), array_values($repl), $data) : $data;
+        return $this->config->get('AnalyticsJS', 'compress_js')
+            ? preg_replace(array_keys($repl), array_values($repl), $data)
+            : $data;
     }
 
     /*
      * Statically add Universal Analytics configs
      * Kept for backwards compatibility
-     * @param array (see README.md)
+     * @param array
      * @return null
      */
     public static function add_ga()
