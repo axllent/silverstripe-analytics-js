@@ -1,4 +1,4 @@
-# Google Universal Analytics-js tracking code for SilverStripe 3
+# Google Universal Analytics-js tracking code for SilverStripe
 
 An extension to add Google **Universal Analytics.js** tracking code (`ga()`) to your SilverStripe templates.
 
@@ -27,7 +27,7 @@ Event category names (eg: "Outgoing Links", "Downloads" etc) can be configured i
 
 ## Requirements
 
-- SilverStripe 3+
+- SilverStripe 4+
 
 ## Installation
 
@@ -44,7 +44,7 @@ Download the latest release from [GitHub](https://github.com/axllent/silverstrip
 Once installed the extension is automatically loaded if you provide at least one tracking account in your config yaml file (eg) `mysite/_config/analytics.yml`
 
 ```yml
-AnalyticsJS:
+Axllent\Analytics\AnalyticsJS:
   tracker:
     - ['create', 'UA-1234567-1', 'auto']
 ```
@@ -52,18 +52,19 @@ AnalyticsJS:
 The syntax is very similar to the official documentation, so things like secondary trackers or other configurations can be easily added. Please note that secondary trackers must contain a unique `"name"`.
 
 ```yml
-AnalyticsJS:
+Axllent\Analytics\AnalyticsJS:
   tracker:
     - ['create', 'UA-1234567-1', 'auto']  # default account [required]
     - ['create', 'UA-1237654-1', 'auto', {'name':'MyOtherTracker'}] # add secondary tracker
     - ['set', 'forceSSL', true]           # force tracking to use SSL
     - ['require', 'ecommerce', 'ecommerce.js']  # load ecommerce extension
-  global_name: 'myGATracker'            # set a different tracker function name (defaults to "ga")
-  track_links: false                    # disable external link / asset tracking
-  compress_js: false                    # do not compress inline JavaScript
+  global_name: 'myGATracker'              # set a different tracker function name (defaults to "ga")
+  track_links: false                      # disable external link / asset tracking
+  ignore_link_class:  "notrack"           # if "track_links", then ignore external links with the "notrack" class
+  compress_js: false                      # do not compress inline JavaScript
 ```
 
-Please refer to the `_config/config.yml` for all configuration options.
+Please refer to the `_config/defaults.yml` for all configuration options.
 
 To start live tracking, make sure your website is in `live` mode:
 

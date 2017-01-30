@@ -2,6 +2,12 @@
 
 Notable changes to this project will be documented in this file.
 
+## [3.0.0]
+- Support for SilverStripe 4
+- Updated yaml config (please take note of changes FQCNs!)
+- Updated tracker properties to HTMLText required for templating
+- Add optional "no tracking" classname for external links
+
 ## [2.0.0]
 
 Major rewrite of entire module! No changes needed if you're upgrading.

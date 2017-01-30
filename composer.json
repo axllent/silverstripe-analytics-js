@@ -15,6 +15,11 @@
 		"issues": "https://github.com/axllent/silverstripe-analytics-js/issues"
 	},
 	"require": {
-		"silverstripe/cms": "3.*"
-	}
+		"silverstripe/framework": "^4.0@dev"
+	},
+    "autoload": {
+        "psr-4": {
+            "Axllent\\AnalyticsJS\\": "src/"
+        }
+    }
 }

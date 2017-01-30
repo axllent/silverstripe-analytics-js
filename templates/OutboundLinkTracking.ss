@@ -12,7 +12,7 @@ function _guaLt(e) {
         el = el.parentNode;
     }
 
-    if (el && el.href) {
+    if (el && el.href<% if $IgnoreClass %> && !el.className.match(/\\b{$IgnoreClass}\\b/)<% end_if %>) {
         var dl = document.location;
         var l = dl.pathname + dl.search; /* event label = referer */
         var h = el.href; /* event link */
@@ -42,14 +42,13 @@ function _guaLt(e) {
             c = "{$LinkCategory}";
         }
 
-        /* else if /assets/ (not images) track as "Downloads" */
+        /* if /assets/ (not images) track as "Downloads" */
         else if (h.match(/\\/assets\\//) && !h.match(/\\.(jpe?g|bmp|png|gif|tiff?)$/i)) {
             c = "{$DownloadsCategory}";
             a = h.match(/\\/assets\\/(.*)/)[1];
         }
 
         if (c) {
-
             if (t) {
                 /* link opens a new window already - just track */
                 $NonCallbackTrackers
@@ -72,9 +71,8 @@ function _guaLt(e) {
                 /* Add GA tracker(s) */
                 $CallbackTrackers
 
-                /* Run hitCallback function if GA takes too long */
+                /* Run hitCallback function if GA takes too long (1 second) */
                 setTimeout(hb,1000);
-
             }
         }
     }
@@ -85,5 +83,5 @@ var _w = window;
 /* Use "click" if touchscreen device, else "mousedown" */
 var _gaLtEvt = ("ontouchstart" in _w) ? "click" : "mousedown";
 /* Attach the event to all clicks in the document after page has loaded */
-_w.addEventListener ? _w.addEventListener("load", function(){document.body.addEventListener(_gaLtEvt, _guaLt, !1)}, !1)
- : _w.attachEvent && _w.attachEvent("onload", function(){document.body.attachEvent("on" + _gaLtEvt, _guaLt)});
+_w.addEventListener ? _w.addEventListener("load",function(){document.body.addEventListener(_gaLtEvt,_guaLt,!1)},!1)
+    : _w.attachEvent && _w.attachEvent("onload",function(){document.body.attachEvent("on"+_gaLtEvt,_guaLt)});
