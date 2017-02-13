@@ -11,6 +11,9 @@ Major rewrite of entire module! No changes needed if you're upgrading.
 - Better JavaScript to cater for Ctrl|Alt|Meta-click combinations
 - Use `mousedown` event to fire tracking (except for touchscreen devices) to bypass limitations in Internet Explorer which ignores `click` events with Ctrl|Alt|Meta-click
 
+## [1.1.1]
+- Add option to use a locally cached Google analytics.js (48 hours) rather than online version
+
 ## [1.1.0]
 
 Unfortunately the previous "silverstripe-analytics.js" folder name was causing some issues upstream (SilverStripe modules site), so I have had to rename the project to "silverstripe-analytics-js". Apologies in advance is this mucks up your composer config (simple fix however).

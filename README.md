@@ -61,6 +61,7 @@ AnalyticsJS:
   global_name: 'myGATracker'            # set a different tracker function name (defaults to "ga")
   track_links: false                    # disable external link / asset tracking
   compress_js: false                    # do not compress inline JavaScript
+  cache_analytics_js:  true             # Cache a local copy of the GA JavaScipt
 ```
 
 Please refer to the `_config/config.yml` for all configuration options.

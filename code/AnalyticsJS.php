@@ -148,12 +148,18 @@ class AnalyticsJS extends Extension
         $headerscript = '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){' . "\n" .
             '(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),' . "\n" .
             'm=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)' . "\n" .
-            '})(window,document,"script","//www.google-analytics.com/analytics.js","' . self::$global_name . '");' . "\n" .
+            '})(window,document,"script","' . $this->getAnalyticsScript() . '","' . self::$global_name . '");' . "\n" .
             self::$ga_trackers . $ga_insert;
 
         Requirements::insertHeadTags('<script type="text/javascript">//<![CDATA[' . "\n" . $this->compressGUACode($headerscript) . "\n" . '//]]></script>');
     }
 
+    protected function getAnalyticsScript()
+    {
+        return $this->config->get('AnalyticsJS', 'cache_analytics_js') ?
+            Director::baseURL() . '_ga/analytics.js' :
+                '//www.google-analytics.com/analytics.js';
+    }
 
     /*
      * Generate and inject customScript() JavaScript link-tracking code

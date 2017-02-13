@@ -1,0 +1,7 @@
+---
+Name: googleanalyticscaching
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    '_ga/analytics':   'GoogleAnalyticsCache_Controller'

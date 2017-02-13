@@ -8,3 +8,4 @@ AnalyticsJS:
   downloads_category: "Downloads"         # Phone link category name for GA
   404_category:       "Page Not Found"    # 404 page category name for GA
   error_category:     "Page Error"        # Error page category (not 404) for GA
+  cache_analytics_js: false               # Cache a local copy of the GA JavaScipt
