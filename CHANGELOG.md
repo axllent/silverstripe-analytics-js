@@ -12,7 +12,7 @@ Major rewrite of entire module! No changes needed if you're upgrading.
 - Use `mousedown` event to fire tracking (except for touchscreen devices) to bypass limitations in Internet Explorer which ignores `click` events with Ctrl|Alt|Meta-click
 
 ## [1.1.1]
-- Add option to use a locally cached Google analytics.js (48 hours) rather than online version
+- Add option to use a locally cached Google analytics.js (default: 48 hours)
 
 ## [1.1.0]
 

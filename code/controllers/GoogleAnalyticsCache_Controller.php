@@ -20,7 +20,7 @@ class GoogleAnalyticsCache_Controller extends Controller
             return $this->Redirect('https://www.google-analytics.com/analytics.js');
         }
 
-        $seconds_to_cache = 48 * 60 * 60;
+        $seconds_to_cache = $this->config->get('AnalyticsJS', 'cache_hours') * 60 * 60;
 
         $this->response->addHeader('Content-type', 'application/javascript');
         $this->response->addHeader('Expires', gmdate('D, d M Y H:i:s', time() + $seconds_to_cache) . ' GMT');
