@@ -36,11 +36,11 @@ class AnalyticsJS extends Extension
     protected function injectGoogleUniversalAnalyticsCode()
     {
         /* Parse static configs */
-            $this->parseAnalyticsConfigs();
-            /* Generate header code with configs */
-            $this->genAnalyticsCodeTrackingCode();
-            /* Add link tracking code */
-            $this->genLinkTrackingCode();
+        $this->parseAnalyticsConfigs();
+        /* Generate header code with configs */
+        $this->genAnalyticsCodeTrackingCode();
+        /* Add link tracking code */
+        $this->genLinkTrackingCode();
     }
 
 
