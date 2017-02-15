@@ -3,6 +3,7 @@
 Notable changes to this project will be documented in this file.
 
 ## [2.0.1]
+
 - Add option to use a locally cached Google analytics.js (default off)
 - Add cache_hours option to set caching period (default: 48 hours)
 
