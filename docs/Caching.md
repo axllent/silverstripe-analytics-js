@@ -12,6 +12,10 @@ the local cache is set to (default is 48 hours), and serve that copy rather than
 
 There is no modification done to the cached copy, so the tracking works exactly the same as if the file
 was loaded off the Google servers.
+To use caching, you must have [Guzzle](https://github.com/guzzle/guzzle) installed:
+```
+composer require guzzlehttp/guzzle
+```
 
 To enable local caching, set the option in your yaml config (eg: `mysite/_config/analytics.yaml`)
 ```yaml

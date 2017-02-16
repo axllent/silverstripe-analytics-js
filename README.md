@@ -29,7 +29,7 @@ Event category names (eg: "Outgoing Links", "Downloads" etc) can be configured i
 ## Requirements
 
 - SilverStripe 4.*
-- Guzzle (included with composer install)
+- Guzzle if local caching is selected
 
 For SilverStripe 3, please refer to the [SilverStripe3 branch](https://github.com/axllent/silverstripe-analytics-js/tree/silverstripe3).
 
@@ -38,6 +38,11 @@ For SilverStripe 3, please refer to the [SilverStripe3 branch](https://github.co
 You can install it via composer with
 ```
 composer require axllent/silverstripe-analytics-js
+```
+#### Guzzle for caching (optional)
+If you require local caching of Google Analytics, then you must have Guzzle installed too.
+```
+composer require guzzlehttp/guzzle
 ```
 
 ## Basic usage

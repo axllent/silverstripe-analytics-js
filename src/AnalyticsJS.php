@@ -4,6 +4,7 @@ namespace Axllent\AnalyticsJS;
 
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
@@ -101,7 +102,7 @@ class AnalyticsJS extends Extension
                     // no unique name has been specified for additional tracker
                     if ($this->ga_configs[$ufname] != $conf[1]) {
                         Injector::inst()->get('Logger')
-                            ->addError('Tracker "' . $ufname .'" already set, please use a unique name');
+                            ->addWarning('Tracker "' . $ufname .'" already set, please use a unique name');
                         return false;
                     }
                     return false;
@@ -171,9 +172,13 @@ class AnalyticsJS extends Extension
      */
     protected function getAnalyticsScript()
     {
-        return $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js') ?
-            Director::baseURL() . '_ga/analytics.js' :
-                '//www.google-analytics.com/analytics.js';
+        $cache_allowed = $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js');
+        if ($cache_allowed && !class_exists('GuzzleHttp\Client')) {
+            Injector::inst()->get('Logger')
+                ->addWarning('Please install Guzzle if you wish to use Analytics-JS caching');
+            return '//www.google-analytics.com/analytics.js';
+        }
+        return $cache_allowed ? Director::baseURL() . '_ga/analytics.js' : '//www.google-analytics.com/analytics.js';
     }
 
     /*
@@ -248,7 +253,7 @@ class AnalyticsJS extends Extension
             $conf = $this->config->get('AnalyticsJS', 'tracker');
             if ($conf) {
                 Injector::inst()->get('Logger')
-                    ->addError('Update your "AnalyticsJS" yaml configs to use "Axllent\AnalyticsJS\AnalyticsJS"');
+                    ->addWarning('Update your "AnalyticsJS" yaml configs to use "Axllent\AnalyticsJS\AnalyticsJS"');
             }
         }
     }
