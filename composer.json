@@ -15,7 +15,8 @@
 		"issues": "https://github.com/axllent/silverstripe-analytics-js/issues"
 	},
 	"require": {
-		"silverstripe/framework": "^4.0@dev"
+		"silverstripe/framework": "^4.0@dev",
+        "guzzlehttp/guzzle": "^6.2"
 	},
     "autoload": {
         "psr-4": {

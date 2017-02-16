@@ -1,0 +1,7 @@
+---
+Name: googleanalyticscaching
+After: framework/routes#coreroutes
+---
+SilverStripe\Control\Director:
+  rules:
+    '_ga/analytics':   'Axllent\AnalyticsJS\AnalyticsJSCache_Controller'

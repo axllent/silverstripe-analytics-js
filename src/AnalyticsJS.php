@@ -44,7 +44,7 @@ class AnalyticsJS extends Extension
     {
         $this->config = Config::inst();
 
-        // parse configs
+        // Parse configs
         $this->parseAnalyticsConfigs();
 
         // Generate header code with configs
@@ -158,10 +158,22 @@ class AnalyticsJS extends Extension
         $headerscript = '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){' . "\n" .
             '(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),' . "\n" .
             'm=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)' . "\n" .
-            '})(window,document,"script","//www.google-analytics.com/analytics.js","' . $this->global_name . '");' . "\n" .
+            '})(window,document,"script","' . $this->getAnalyticsScript() . '","' . $this->global_name . '");' . "\n" .
             $this->ga_trackers . $ga_insert;
 
         Requirements::insertHeadTags('<script type="text/javascript">//<![CDATA[' . "\n" . $this->compressGUACode($headerscript) . "\n" . '//]]></script>');
+    }
+
+    /**
+     * Get the location of the tracking script
+     * @param null
+     * @return String
+     */
+    protected function getAnalyticsScript()
+    {
+        return $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js') ?
+            Director::baseURL() . '_ga/analytics.js' :
+                '//www.google-analytics.com/analytics.js';
     }
 
     /*

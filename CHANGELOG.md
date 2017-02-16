@@ -2,11 +2,21 @@
 
 Notable changes to this project will be documented in this file.
 
+## [3.0.1]
+
+- Add option to use a locally cached Google analytics.js (default off)
+- Add cache_hours option to set caching period (default: 48 hours)
+
 ## [3.0.0]
 - Support for SilverStripe 4
 - Updated yaml config (please take note of changes FQCNs!)
 - Updated tracker properties to HTMLText required for templating
 - Add optional "no tracking" classname for external links
+
+## [2.0.1]
+
+- Add option to use a locally cached Google analytics.js (default off)
+- Add cache_hours option to set caching period (default: 48 hours)
 
 ## [2.0.0]
 
