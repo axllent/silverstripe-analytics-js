@@ -19,7 +19,7 @@
 	},
     "suggest": {
         "guzzlehttp/guzzle": "Needed to support local caching of analytics.js"
-    }
+    },
     "autoload": {
         "psr-4": {
             "Axllent\\AnalyticsJS\\": "src/"
