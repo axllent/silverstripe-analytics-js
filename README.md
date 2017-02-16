@@ -29,7 +29,9 @@ Event category names (eg: "Outgoing Links", "Downloads" etc) can be configured i
 ## Requirements
 
 - SilverStripe 4.*
-- [SilverStripe 3 branch](https://github.com/axllent/silverstripe-analytics-js/tree/silverstripe3)
+- Guzzle (included with composer install)
+
+For SilverStripe 3, please refer to the [SilverStripe3 branch](https://github.com/axllent/silverstripe-analytics-js/tree/silverstripe3).
 
 ## Installation via Composer
 
