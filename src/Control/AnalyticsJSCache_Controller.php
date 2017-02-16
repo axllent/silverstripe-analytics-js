@@ -22,7 +22,7 @@ use SilverStripe\Core\Injector\Injector;
  */
 class AnalyticsJSCache_Controller extends Controller
 {
-    private $ga_script = 'https://www.google-analytics.com/analytics.jss';
+    private $ga_script = 'https://www.google-analytics.com/analytics.js';
 
     public function index($request)
     {

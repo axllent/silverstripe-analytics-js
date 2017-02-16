@@ -29,7 +29,7 @@ Event category names (eg: "Outgoing Links", "Downloads" etc) can be configured i
 ## Requirements
 
 - SilverStripe 4.*
-- Guzzle if local caching is selected
+- Guzzle (if local `analytics.js` caching is enabled)
 
 For SilverStripe 3, please refer to the [SilverStripe3 branch](https://github.com/axllent/silverstripe-analytics-js/tree/silverstripe3).
 
@@ -68,7 +68,7 @@ Axllent\Analytics\AnalyticsJS:
   track_links: false                      # disable external link / asset tracking
   ignore_link_class:  "notrack"           # if "track_links", then ignore external links with the "notrack" class
   compress_js: false                      # do not compress inline JavaScript
-  cache_analytics_js:  true               # link to a local copy of the cached Google `analytics.js`
+  cache_analytics_js:  true               # link to a local copy of the cached Google `analytics.js` (requires Guzzle)
 ```
 
 Please refer to the `_config/defaults.yml` for all configuration options.

@@ -18,7 +18,7 @@
 		"silverstripe/framework": "^4.0@dev"
 	},
     "suggest": {
-        "guzzlehttp/guzzle": "Needed to support local caching of analytics.js"
+        "guzzlehttp/guzzle": "optional: if you require caching of analytics.js"
     },
     "autoload": {
         "psr-4": {
