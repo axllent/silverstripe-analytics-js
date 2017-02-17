@@ -50,7 +50,7 @@ composer require guzzlehttp/guzzle
 Once installed the extension is automatically loaded if you provide at least one tracking account in your config yaml file (eg) `mysite/_config/analytics.yml`
 
 ```yaml
-Axllent\Analytics\AnalyticsJS:
+Axllent\AnalyticsJS\AnalyticsJS:
   tracker:
     - ['create', 'UA-1234567-1', 'auto']
 ```
@@ -58,7 +58,7 @@ Axllent\Analytics\AnalyticsJS:
 The syntax is very similar to the official documentation, so things like secondary trackers or other configurations can be easily added. Please note that secondary trackers must contain a unique `"name"`.
 
 ```yaml
-Axllent\Analytics\AnalyticsJS:
+Axllent\AnalyticsJS\AnalyticsJS:
   tracker:
     - ['create', 'UA-1234567-1', 'auto']  # default account [required]
     - ['create', 'UA-1237654-1', 'auto', {'name':'MyOtherTracker'}] # add secondary tracker

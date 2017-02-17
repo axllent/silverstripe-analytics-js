@@ -19,7 +19,7 @@ composer require guzzlehttp/guzzle
 
 To enable local caching, set the option in your yaml config (eg: `mysite/_config/analytics.yaml`)
 ```yaml
-Axllent\Analytics\AnalyticsJS:
+Axllent\AnalyticsJS\AnalyticsJS:
   cache_analytics_js: true     # defalt false
   cache_hours:        48       # default 48
 ```
