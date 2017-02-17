@@ -5,8 +5,6 @@ sudo: false
 language: php
 
 php:
-  - 5.3
-  - 5.4
   - 5.5
   - 5.6
   - 7.0
@@ -31,7 +29,6 @@ before_script:
   - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
   - cd ~/builds/ss
   - composer install
-  - composer require axllent/silverstripe-analytics-js
 
 script:
   - vendor/bin/phpunit silverstripe-analytics-js/tests

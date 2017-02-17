@@ -6,6 +6,7 @@ use SilverStripe\Core\Config\Config;
 
 class AnalyticsJSTest extends FunctionalTest
 {
+
     public function setUp()
     {
         parent::setUp();
