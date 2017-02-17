@@ -2,9 +2,6 @@
 
 namespace Axllent\AnalyticsJS;
 
-// use GuzzleHttp\Client;
-// use GuzzleHttp\Exception\RequestException;
-// use GuzzleHttp\Psr7;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Cache;
