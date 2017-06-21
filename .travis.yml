@@ -29,6 +29,7 @@ before_script:
   - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
   - cd ~/builds/ss
   - composer install
+  - composer require guzzlehttp/guzzle
 
 script:
   - vendor/bin/phpunit silverstripe-analytics-js/tests
