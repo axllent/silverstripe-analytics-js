@@ -2,9 +2,9 @@
 
 namespace Axllent\AnalyticsJS;
 
+use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
-use SilverStripe\Core\Cache;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
@@ -23,7 +23,7 @@ class AnalyticsJSCache_Controller extends Controller
 
     public function index($request)
     {
-        $cache_allowed = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js') * 60 * 60;
+        $cache_allowed = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js');
 
         if (!$cache_allowed || !class_exists('GuzzleHttp\Client')) {
             return $this->httpError(404);
@@ -31,11 +31,9 @@ class AnalyticsJSCache_Controller extends Controller
 
         $seconds_to_cache = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_hours') * 60 * 60;
 
-        Cache::set_cache_lifetime('analyticsjs', $seconds_to_cache);
+        $cache = Injector::inst()->get(CacheInterface::class . '.analyticsJs');
 
-        $cache = Cache::factory('analyticsjs');
-
-        if (!$javascript = $cache->load('javascript')) {
+        if (!$javascript = $cache->get('javascript')) {
             $client = new \GuzzleHttp\Client([
                 'timeout'  => 5, // seconds
                 'headers' => [ // Appear like a web browser
@@ -56,7 +54,7 @@ class AnalyticsJSCache_Controller extends Controller
                     return;
                 }
             }
-            $cache->save($javascript, 'javascript');
+            $cache->set('javascript', $javascript, $seconds_to_cache);
         }
 
         $this->response->addHeader('Content-type', 'application/javascript');
