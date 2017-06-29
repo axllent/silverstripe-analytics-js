@@ -2,11 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
-## [3.0.2]
+## [3.1.2]
 
 - Switch to new SilverStripe caching
 
-## [3.0.1]
+## [3.1.0]
 
 - Add option to use a locally cached Google analytics.js (default off - requires Guzzle)
 - Add cache_hours option to set caching period (default: 48 hours)
