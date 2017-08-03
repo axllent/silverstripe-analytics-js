@@ -6,8 +6,8 @@ Notable changes to this project will be documented in this file.
 
 - Replace default configuration with static variables
 - Add `track_in_dev_mode` option
-- Rename `404_category` option to `page_404_category` (cant't declare static variable beginning with a number)
-- Rename `error_category` option to `page_error_category` (cant't declare static variable beginning with a number)
+- Rename `404_category` option to `page_404_category` (cannot declare static variable beginning with a number)
+- Rename `error_category` option to `page_error_category` (cannot declare static variable beginning with a number)
 
 
 ## [3.1.2]
