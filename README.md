@@ -71,10 +71,7 @@ Axllent\AnalyticsJS\AnalyticsJS:
   cache_analytics_js:  true               # link to a local copy of the cached Google `analytics.js` (requires Guzzle)
 ```
 
-Please refer to the `_config/defaults.yml` for all configuration options.
+Please refer to the [Configuration.md](docs/en/Configuration.md) for all configuration options.
 
-To start live tracking, make sure your website is in `live` mode:
-
-```php
-define('SS_ENVIRONMENT_TYPE', 'live');
-```
+To start live tracking, make sure your website is in `live` mode, or if running in `dev` or `staging` that you
+have the `track_in_dev_mode: true` option.

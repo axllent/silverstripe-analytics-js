@@ -24,11 +24,91 @@ use SilverStripe\View\Requirements;
 
 class AnalyticsJS extends Extension
 {
+
+    /**
+     * @config
+     * Tracker function name
+     */
+    private static $global_name = 'ga';
+
+    /**
+     * @config
+     * Allow live tracking in dev/staging mode
+     */
+    private static $track_in_dev_mode = false;
+
+    /**
+     * @config
+     * Compress inline JavaScript
+     */
+    private static $compress_js = true;
+
+    /**
+     * @config
+     * Enable external link / asset GA event tracking
+     */
+    private static $track_links = true;
+
+    /**
+     * @config
+     * Ignore external link tracking for links matching <class>
+     */
+    private static $ignore_link_class = false;
+
+    /**
+     * @config
+     * Outgoing link category name for GA event logging
+     */
+    private static $link_category = 'Outgoing Links';
+
+    /**
+     * @config
+     * Email link category name for GA event logging
+     */
+    private static $email_category = 'Email Links';
+
+    /**
+     * @config
+     * Phone link category name for GA event logging
+     */
+    private static $phone_category = 'Phone Links';
+
+    /**
+     * @config
+     * Download link category name for GA event logging
+     */
+    private static $downloads_category = 'Downloads';
+
+    /**
+     * @config
+     * 404 page category name for GA event logging
+     */
+    private static $page_404_category = 'Page Not Found';
+
+    /**
+     * @config
+     * Error page category (not 404) for GA event logging
+     */
+    private static $page_error_category = 'Page Error';
+
+    /**
+     * @config
+     * Use a local (cached) copy of the analytics.js rather than link to live version
+     */
+    private static $cache_analytics_js = false;
+
+    /**
+     * @config
+     * Cache local analytics.js for xx hours
+     */
+    private static $cache_hours = 48;
+
+    /* @end Config */
+
     protected $tracker_config = [];
     protected $ga_trackers = false;
     protected $tracker_names = [];
     protected $ga_configs = [];
-
     protected $tracker_counter = 1;
 
     private static $casting = array(
@@ -43,7 +123,7 @@ class AnalyticsJS extends Extension
      */
     public function onAfterInit()
     {
-        $this->config = Config::inst();
+        // $this->config = Config::inst();
 
         // Parse configs
         $this->parseAnalyticsConfigs();
@@ -66,7 +146,7 @@ class AnalyticsJS extends Extension
         $this->testForDeprecatedConfigs();
 
         // Set trackers from yaml
-        if ($trackers = $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'tracker')) {
+        if ($trackers = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'tracker')) {
             foreach ($trackers as $tracker) {
                 array_push($this->tracker_config, $tracker);
             }
@@ -78,9 +158,14 @@ class AnalyticsJS extends Extension
         }
 
         // Set GA global name, typically "ga"
-        $this->global_name = $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'global_name');
+        $this->tracker_name = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'global_name');
 
-        $skip_tracking = (!Director::isLive() || isset($_GET['flush'])) ? true : false;
+        $track_in_dev_mode = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'track_in_dev_mode');
+
+        $skip_tracking = (
+            (!Director::isLive() && !$track_in_dev_mode) ||
+            isset($_GET['flush'])
+        ) ? true : false;
 
         foreach ($this->tracker_config as $conf) {
             $args = [];
@@ -122,7 +207,7 @@ class AnalyticsJS extends Extension
                 array_push($args, json_encode($i));
             }
 
-            $this->ga_trackers .= $this->global_name . '(' . implode(',', $args) .');'."\n";
+            $this->ga_trackers .= $this->tracker_name . '(' . implode(',', $args) .');'."\n";
         }
     }
 
@@ -144,22 +229,22 @@ class AnalyticsJS extends Extension
 
         if ($ErrorCode) {
             $ecode = ($ErrorCode == 404) ?
-                $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', '404_category')
-                : $ErrorCode . $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'error_category');
+                Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'page_404_category')
+                : $ErrorCode . Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'page_error_category');
 
             foreach ($this->tracker_names as $t) {
-                $ga_insert .= $this->global_name . '("' . $t . 'send","event","' . $ecode . '",window.location.pathname+window.location.search,window.referrer);'."\n";
+                $ga_insert .= $this->tracker_name . '("' . $t . 'send","event","' . $ecode . '",window.location.pathname+window.location.search,window.referrer);'."\n";
             }
         } else {
             foreach ($this->tracker_names as $t) {
-                $ga_insert .= $this->global_name . '("' . $t . 'send","pageview");' . "\n";
+                $ga_insert .= $this->tracker_name . '("' . $t . 'send","pageview");' . "\n";
             }
         }
 
         $headerscript = '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){' . "\n" .
             '(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),' . "\n" .
             'm=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)' . "\n" .
-            '})(window,document,"script","' . $this->getAnalyticsScript() . '","' . $this->global_name . '");' . "\n" .
+            '})(window,document,"script","' . $this->getAnalyticsScript() . '","' . $this->tracker_name . '");' . "\n" .
             $this->ga_trackers . $ga_insert;
 
         Requirements::insertHeadTags('<script type="text/javascript">//<![CDATA[' . "\n" . $this->compressGUACode($headerscript) . "\n" . '//]]></script>');
@@ -172,7 +257,7 @@ class AnalyticsJS extends Extension
      */
     protected function getAnalyticsScript()
     {
-        $cache_allowed = $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js');
+        $cache_allowed = Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'cache_analytics_js');
         if ($cache_allowed && !class_exists('GuzzleHttp\Client')) {
             Injector::inst()->get('Logger')
                 ->addWarning('Please install Guzzle if you wish to use Analytics-JS caching');
@@ -188,7 +273,7 @@ class AnalyticsJS extends Extension
     {
         if (
             count($this->tracker_names) == 0 ||
-            !$this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'track_links')
+            !Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'track_links')
         ) {
             return false;
         }
@@ -197,19 +282,19 @@ class AnalyticsJS extends Extension
         $callback_trackers = '';
 
         foreach ($this->tracker_names as $t) {
-            $non_callback_trackers .= $this->global_name . '("'. $t .'send","event",c,a,l);';
-            $callback_trackers .= $this->global_name . '("'. $t .'send","event",c,a,l,{"hitCallback":hb});';
+            $non_callback_trackers .= $this->tracker_name . '("'. $t .'send","event",c,a,l);';
+            $callback_trackers .= $this->tracker_name . '("'. $t .'send","event",c,a,l,{"hitCallback":hb});';
         }
 
         $js = $this->owner->customise(ArrayData::create(array(
-            'GlobalName' => $this->global_name,
+            'GlobalName' => $this->tracker_name,
             'CallbackTrackers' => DBField::create_field('HTMLText', $callback_trackers),
             'NonCallbackTrackers' => DBField::create_field('HTMLText', $non_callback_trackers),
-            'LinkCategory' => $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'link_category'),
-            'EmailCategory' => $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'email_category'),
-            'PhoneCategory' => $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'phone_category'),
-            'DownloadsCategory' => $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'downloads_category'),
-            'IgnoreClass' => $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'ignore_link_class')
+            'LinkCategory' => Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'link_category'),
+            'EmailCategory' => Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'email_category'),
+            'PhoneCategory' => Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'phone_category'),
+            'DownloadsCategory' => Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'downloads_category'),
+            'IgnoreClass' => Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'ignore_link_class')
         )))->renderWith('OutboundLinkTracking');
 
         Requirements::customScript($this->compressGUACode($js));
@@ -239,7 +324,7 @@ class AnalyticsJS extends Extension
             '/\s<\s?/' => '<',
             '/\s>\s?/' => '>'
         );
-        return $this->config->get('Axllent\AnalyticsJS\AnalyticsJS', 'compress_js')
+        return Config::inst()->get('Axllent\AnalyticsJS\AnalyticsJS', 'compress_js')
             ? preg_replace(array_keys($repl), array_values($repl), $data)
             : $data;
     }
@@ -250,7 +335,7 @@ class AnalyticsJS extends Extension
     private function testForDeprecatedConfigs()
     {
         if (Director::isDev()) {
-            $conf = $this->config->get('AnalyticsJS', 'tracker');
+            $conf = Config::inst()->get('AnalyticsJS', 'tracker');
             if ($conf) {
                 Injector::inst()->get('Logger')
                     ->addWarning('Update your "AnalyticsJS" yaml configs to use "Axllent\AnalyticsJS\AnalyticsJS"');
