@@ -15,7 +15,7 @@
 		"issues": "https://github.com/axllent/silverstripe-analytics-js/issues"
 	},
 	"require": {
-		"silverstripe/framework": "^4.0@dev"
+		"silverstripe/framework": "^4.0"
 	},
     "suggest": {
         "guzzlehttp/guzzle": "optional: if you require caching of analytics.js"
