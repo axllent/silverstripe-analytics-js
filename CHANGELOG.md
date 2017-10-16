@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [3.1.4]
+
+- Switch to silverstripe-vendormodule
+
+
 ## [3.1.3]
 
 - Replace default configuration with static variables
