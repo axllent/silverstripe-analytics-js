@@ -203,7 +203,7 @@ class AnalyticsJS extends Extension
     {
         $repl = array(
             '!/\*[^*]*\*+([^/][^*]*\*+)*/!' => '', // Comments
-            '/(    |\n)/' => '', // soft tabs / new lines
+            '/(    |\n|\t)/' => '', // soft tabs / new lines
             '/\s?=\s?/' => '=',
             '/\s?==\s?/' => '==',
             '/\s?!=\s?/' => '!=',
