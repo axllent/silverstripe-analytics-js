@@ -1,83 +1,85 @@
 function _guaLt(e) {
 
-    /* If GA is blocked or not loaded, or not main|middle|touch click then don't track */
-    if (!{$GlobalName}.hasOwnProperty("loaded") || 1 != {$GlobalName}.loaded || (e.which != 1 && e.which != 2)) {
-        return;
-    }
+	/* If GA is blocked or not loaded, or not main|middle|touch click then don't track */
+	if (!{$GlobalName}.hasOwnProperty("loaded") || 1 != {$GlobalName}.loaded || (e.which != 1 && e.which != 2)) {
+		return;
+	}
 
-    var el = e.srcElement || e.target;
+	var el = e.srcElement || e.target;
 
-    /* Loop through parent elements if clicked element is not contained in a link */
-    while (el && (typeof el.tagName == "undefined" || el.tagName.toLowerCase() != "a" || !el.href)) {
-        el = el.parentNode;
-    }
+	/* Loop through parent elements if clicked element is not contained in a link */
+	while (el && (typeof el.tagName == "undefined" || el.tagName.toLowerCase() != "a" || !el.href)) {
+		el = el.parentNode;
+	}
 
-    if (el && el.href) {
-        var dl = document.location;
-        var l = dl.pathname + dl.search; /* event label = referer */
-        var h = el.href; /* event link */
-        var a = h; /* clone link for processing */
-        var c = !1; /* event category */
-        var t = (el.target && !el.target.match(/^_(self|parent|top)$/i)) ? el.target : !1; /* link target */
+	if (el && el.href) {
+		var dl = document.location;
+		var l = dl.pathname + dl.search; /* event label = referer */
+		var h = el.href; /* event link */
+		var a = h; /* clone link for processing */
+		var c = !1; /* event category */
+		var t = (el.target && !el.target.match(/^_(self|parent|top)$/i)) ? el.target : !1; /* link target */
 
-        /* Assume a target if (Ctrl|shift|meta)-click */
-        if (e.ctrlKey || e.shiftKey || e.metaKey || e.which == 2) {
-            t = "_blank";
-        }
+		/* Assume a target if (Ctrl|shift|meta)-click */
+		if (e.ctrlKey || e.shiftKey || e.metaKey || e.which == 2) {
+			t = "_blank";
+		}
 
-        /* telephone links */
-        if (h.match(/^tel\\:/i)) {
-            c = "{$PhoneCategory}";
-            a = h.replace(/\D/g,"");
-        }
+		/* telephone links */
+		if (h.match(/^tel\\:/i)) {
+			c = "{$PhoneCategory}";
+			a = h.replace(/\D/g,"");
+			t = 1;
+		}
 
-        /* email links */
-        else if (h.match(/^mailto\\:/i)) {
-            c = "{$EmailCategory}";
-            a = h.slice(7);
-        }
+		/* email links */
+		else if (h.match(/^mailto\\:/i)) {
+			c = "{$EmailCategory}";
+			a = h.slice(7);
+			t = 1;
+		}
 
-        /* if external (and not JS) link then track event as "Outgoing Links" */
-        else if (h.indexOf(location.host) == -1 && !h.match(/^javascript\\:/i)) {
-            c = "{$LinkCategory}";
-        }
+		/* if external (and not JS) link then track event as "Outgoing Links" */
+		else if (h.indexOf(location.host) == -1 && !h.match(/^javascript\\:/i)) {
+			c = "{$LinkCategory}";
+		}
 
-        /* else if /assets/ (not images) track as "Downloads" */
-        else if (h.match(/\\/assets\\//) && !h.match(/\\.(jpe?g|bmp|png|gif|tiff?)$/i)) {
-            c = "{$DownloadsCategory}";
-            a = h.match(/\\/assets\\/(.*)/)[1];
-        }
+		/* else if /assets/ (not images) track as "Downloads" */
+		else if (h.match(/\\/assets\\//) && !h.match(/\\.(jpe?g|bmp|png|gif|tiff?)$/i)) {
+			c = "{$DownloadsCategory}";
+			a = h.match(/\\/assets\\/(.*)/)[1];
+		}
 
-        if (c) {
+		if (c) {
 
-            if (t) {
-                /* link opens a new window already - just track */
-                $NonCallbackTrackers
-            } else {
-                /* link opens in same window & requires callback */
+			if (t) {
+				/* link opens a new window already - just track */
+				$NonCallbackTrackers
+			} else {
+				/* link opens in same window & requires callback */
 
-                /* Prevent click */
-                e.preventDefault ? e.preventDefault() : e.returnValue = !1;
+				/* Prevent click */
+				e.preventDefault ? e.preventDefault() : e.returnValue = !1;
 
-                var hbrun = false; /* tracker has not yet run */
+				var hbrun = false; /* tracker has not yet run */
 
-                /* hitCallback function for GA */
-                var hb = function() {
-                    /* run once only */
-                    if(hbrun) return;
-                    hbrun = true;
-                    window.location.href = h;
-                };
+				/* hitCallback function for GA */
+				var hb = function() {
+					/* run once only */
+					if(hbrun) return;
+					hbrun = true;
+					window.location.href = h;
+				};
 
-                /* Add GA tracker(s) */
-                $CallbackTrackers
+				/* Add GA tracker(s) */
+				$CallbackTrackers
 
-                /* Run hitCallback function if GA takes too long */
-                setTimeout(hb,1000);
+				/* Run hitCallback function if GA takes too long */
+				setTimeout(hb,1000);
 
-            }
-        }
-    }
+			}
+		}
+	}
 }
 
 /* Attach the event to all clicks in the document after page has loaded */
