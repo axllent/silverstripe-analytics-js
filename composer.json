@@ -4,7 +4,7 @@
 	"type": "silverstripe-vendormodule",
 	"homepage": "https://github.com/axllent/silverstripe-analytics-js",
 	"keywords": ["silverstripe", "analytics", "googleanalytics", "tracking"],
-	"license": "The MIT License (MIT)",
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "Ralph Slooten",
