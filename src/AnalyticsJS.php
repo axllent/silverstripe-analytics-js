@@ -263,7 +263,9 @@ class AnalyticsJS extends Extension
                 ->addWarning('Please install Guzzle if you wish to use Analytics-JS caching');
             return '//www.google-analytics.com/analytics.js';
         }
-        return $cache_allowed ? Director::baseURL() . '_ga/analytics.js' : '//www.google-analytics.com/analytics.js';
+        return $cache_allowed
+        ? Director::baseURL() . '_ga/analytics.js'
+        : 'https://www.google-analytics.com/analytics.js';
     }
 
     /*
