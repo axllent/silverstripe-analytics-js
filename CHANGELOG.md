@@ -2,6 +2,12 @@
 
 Notable changes to this project will be documented in this file.
 
+## [3.1.6]
+
+- Use `https://www.google-analytics.com/analytics.js` not `//www.google-analytics.com/analytics.js`
+- Improve inline documentation / PSR2
+
+
 ## [3.1.5]
 
 - Bugfix - prevent IE from opening email links twice
