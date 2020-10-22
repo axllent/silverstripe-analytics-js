@@ -50,7 +50,7 @@ Once installed the extension is automatically loaded if you provide at least one
 ```yaml
 Axllent\AnalyticsJS\AnalyticsJS:
   tracker:
-    - ['create', 'UA-1234567-1', 'auto']
+    - ['config', 'UA-1234567-1']
 ```
 
 The syntax is very similar to the official documentation, so things like secondary trackers or other configurations can be easily added.
