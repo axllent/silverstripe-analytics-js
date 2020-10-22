@@ -25,7 +25,5 @@ Axllent\AnalyticsJS\AnalyticsJS:
   downloads_category:  "Downloads"           # Download link category name for GA event logging
   page_404_category:   "Page Not Found"      # 404 page category name for GA event logging
   page_error_category: "Page Error"          # Error page category (not 404) for GA event logging
-  cache_analytics_js:  false                 # Cache a local copy of the GA JavaScipt
-  cache_hours:         48                    # Link to a local copy of the cached Google `analytics.js`
   track_in_dev_mode:   true                  # Allow live tracking in dev/staging mode
 ```

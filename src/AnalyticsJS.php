@@ -101,20 +101,6 @@ class AnalyticsJS extends Extension
     private static $page_error_category = 'Page Error';
 
     /**
-     * Use a local (cached) copy of the analytics.js rather than link to live version
-     *
-     * @config
-     */
-    private static $cache_analytics_js = false;
-
-    /**
-     * Cache local analytics.js for xx hours
-     *
-     * @config
-     */
-    private static $cache_hours = 48;
-
-    /**
      * Tracker config
      *
      * @var array
@@ -316,19 +302,7 @@ class AnalyticsJS extends Extension
      */
     protected function getAnalyticsScript()
     {
-        $cache_allowed = Config::inst()->get(self::class, 'cache_analytics_js');
-        if ($cache_allowed && !class_exists('GuzzleHttp\Client')) {
-            Injector::inst()->get('Logger')
-                ->addWarning(
-                    'Please install Guzzle if you wish to use Analytics-JS caching'
-                );
-
-            return 'https://www.google-analytics.com/analytics.js';
-        }
-
-        return $cache_allowed
-        ? Director::baseURL() . '_ga/analytics.js'
-        : 'https://www.google-analytics.com/analytics.js';
+        return 'https://www.google-analytics.com/analytics.js';
     }
 
     /**
