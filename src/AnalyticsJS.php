@@ -3,9 +3,8 @@ namespace Axllent\AnalyticsJS;
 
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
-use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\View\ArrayData;
 use SilverStripe\View\Requirements;
@@ -22,14 +21,6 @@ use SilverStripe\View\Requirements;
 
 class AnalyticsJS extends Extension
 {
-
-    /**
-     * Tracker function name
-     *
-     * @config
-     */
-    private static $global_name = 'ga';
-
     /**
      * Allow live tracking in dev/staging mode
      *
@@ -101,6 +92,13 @@ class AnalyticsJS extends Extension
     private static $page_error_category = 'Page Error';
 
     /**
+     * The primary tracking id for the gtag script
+     * 
+     * @config
+     */
+    private static $primary_gtag_id = '';
+
+    /**
      * Tracker config
      *
      * @var array
@@ -134,7 +132,14 @@ class AnalyticsJS extends Extension
      * @var int
      */
     protected $tracker_counter = 1;
-
+    
+    /**
+     * GTAG tracking id
+     * 
+     * @var string
+     */
+    protected $gtag_id = '';
+    
     /**
      * Casting
      *
@@ -154,8 +159,6 @@ class AnalyticsJS extends Extension
      */
     public function onAfterInit()
     {
-        // $this->config = Config::inst();
-
         // Parse configs
         $this->parseAnalyticsConfigs();
 
@@ -188,9 +191,6 @@ class AnalyticsJS extends Extension
             return false;
         }
 
-        // Set GA global name, typically "ga"
-        $this->tracker_name = Config::inst()->get(self::class, 'global_name');
-
         $track_in_dev_mode = Config::inst()->get(self::class, 'track_in_dev_mode');
 
         $skip_tracking = (
@@ -201,33 +201,46 @@ class AnalyticsJS extends Extension
         foreach ($this->tracker_config as $conf) {
             $args = [];
 
-            if ($conf[0] == 'create') {
-                $tname = false;
-
-                foreach ($conf as $i) {
-                    if (is_array($i) && isset($i['name'])) {
-                        $tname = $i['name'] . '.';
-                        break;
-                    }
-                }
-
-                $ufname = ($tname === false) ? 'Default' : $tname;
-
+            if ($conf[0] == 'config' || $conf[0] == 'create') {
                 // Check if config has already been set (or _config.php has been run a second time)
-                if (isset($this->ga_configs[$ufname])) {
+                if (isset($this->ga_configs[$conf[1]])) {
                     // no unique name has been specified for additional tracker
-                    if ($this->ga_configs[$ufname] != $conf[1]) {
-                        Injector::inst()->get('Logger')
-                            ->addWarning(
-                                'Tracker "' . $ufname . '" already set, please use a unique name'
-                            );
+                    if ($this->ga_configs[$conf[1]] != $conf[1]) {
+                        user_error('Tracker "' . $conf[1] . '" already set', E_USER_WARNING);
 
                         return false;
                     }
 
                     return false;
                 } else {
-                    $this->ga_configs[$ufname] = $conf[1];
+                    $this->ga_configs[$conf[1]] = $conf[1];
+                }
+
+                // Backwards compatibility
+                if ($conf[0] == 'create') {
+                    $conf[0] = 'config';
+
+                    $extraConfig = [];
+                    if (isset($conf[2]) && is_string($conf[2])) {
+                        if ($conf[2] != 'auto') {
+                            $extraConfig['cookie_domain'] = $conf[2];
+                        }
+
+                        unset($conf[2]); // Remove the cookie domain
+                    }
+
+                    if (isset($conf[3]) && is_string($conf[3])) {
+                        $extraConfig['groups'] = $conf[3];
+                        unset($conf[3]);
+                    }
+
+                    $conf = array_values($conf); // Re-key the array
+
+                    if (!empty($extraConfig)) {
+                        $conf[] = $extraConfig;
+                    }
+
+                    user_error('Tracker "' . $conf[1] . '" automatically migrated, you should update your tracking config', E_USER_DEPRECATED);
                 }
 
                 // Replace Tracker IDs with fake ones if not in LIVE mode
@@ -239,14 +252,20 @@ class AnalyticsJS extends Extension
                     );
                 }
 
-                array_push($this->tracker_names, $tname);
+                array_push($this->tracker_names, $conf[1]);
+            }
+            
+            if (Config::inst()->get(self::class, 'primary_gtag_id')) {
+                $this->gtag_id = Config::inst()->get(self::class, 'primary_gtag_id');
+            } else {
+                $this->gtag_id = $this->tracker_names[0];
             }
 
             foreach ($conf as $i) {
                 array_push($args, json_encode($i));
             }
 
-            $this->ga_trackers .= $this->tracker_name . '(' . implode(',', $args) . ');' . "\n";
+            $this->ga_trackers .= 'gtag(' . implode(',', $args) . ');' . "\n";
         }
     }
 
@@ -272,37 +291,21 @@ class AnalyticsJS extends Extension
             : $ErrorCode . Config::inst()->get(self::class, 'page_error_category');
 
             foreach ($this->tracker_names as $t) {
-                $ga_insert .= $this->tracker_name . '("' . $t .
-                    'send","event","' . $ecode .
-                    '",window.location.pathname+window.location.search,window.referrer);' .
-                    "\n";
-            }
-        } else {
-            foreach ($this->tracker_names as $t) {
-                $ga_insert .= $this->tracker_name . '("' . $t . 'send","pageview");' . "\n";
+                $ga_insert .= 'gtag("event","' . $ecode . '",{"send_to":"' . $t . '"});' . "\n";
             }
         }
+        
+        Requirements::insertHeadTags('<script async src="https://www.googletagmanager.com/gtag/js?id=' . urlencode($this->gtag_id) . '"></script>', 'analyticsjs-gtag');
 
-        $headerscript = '(function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){' . "\n" .
-        '(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),' . "\n" .
-        'm=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)' . "\n" .
-        '})(window,document,"script","' . $this->getAnalyticsScript() . '","' . $this->tracker_name . '");' . "\n" .
+        $headerscript = "window.dataLayer = window.dataLayer || [];\n" .
+        "function gtag(){dataLayer.push(arguments);}\n" .
+        "gtag('js', new Date());\n" .
         $this->ga_trackers . $ga_insert;
 
         Requirements::insertHeadTags(
             '<script type="text/javascript">//<![CDATA[' . "\n" .
             $this->compressGUACode($headerscript) . "\n" . '//]]></script>'
         );
-    }
-
-    /**
-     * Get the location of the tracking script
-     *
-     * @return string
-     */
-    protected function getAnalyticsScript()
-    {
-        return 'https://www.google-analytics.com/analytics.js';
     }
 
     /**
@@ -322,14 +325,13 @@ class AnalyticsJS extends Extension
         $callback_trackers     = '';
 
         foreach ($this->tracker_names as $t) {
-            $non_callback_trackers .= $this->tracker_name . '("' . $t . 'send","event",c,a,l);';
-            $callback_trackers .= $this->tracker_name . '("' . $t . 'send","event",c,a,l,{"hitCallback":hb});';
+            $non_callback_trackers .= 'gtag("event",{"send_to":"' . $t . '","event_category":c,"event_action":a,"event_label":l});';
+            $callback_trackers .= 'gtag("event",{"send_to":"' . $t . '","event_category":c,"event_action":a,"event_label":l,"event_callback":hb});';
         }
 
         $js = $this->owner->customise(
             ArrayData::create(
                 [
-                    'GlobalName'          => $this->tracker_name,
                     'CallbackTrackers'    => DBField::create_field('HTMLText', $callback_trackers),
                     'NonCallbackTrackers' => DBField::create_field('HTMLText', $non_callback_trackers),
                     'LinkCategory'        => Config::inst()->get(self::class, 'link_category'),
@@ -386,10 +388,7 @@ class AnalyticsJS extends Extension
         if (Director::isDev()) {
             $conf = Config::inst()->get('AnalyticsJS', 'tracker');
             if ($conf) {
-                Injector::inst()->get('Logger')
-                    ->addWarning(
-                        'Update your "AnalyticsJS" yaml configs to use "Axllent\AnalyticsJS\AnalyticsJS"'
-                    );
+                user_error('Update your "AnalyticsJS" yaml configs to use "Axllent\AnalyticsJS\AnalyticsJS"', E_USER_DEPRECATED);
             }
         }
     }

@@ -53,19 +53,19 @@ Axllent\AnalyticsJS\AnalyticsJS:
     - ['create', 'UA-1234567-1', 'auto']
 ```
 
-The syntax is very similar to the official documentation, so things like secondary trackers or other configurations can be easily added. Please note that secondary trackers must contain a unique `"name"`.
+The syntax is very similar to the official documentation, so things like secondary trackers or other configurations can be easily added.
 
 ```yaml
 Axllent\AnalyticsJS\AnalyticsJS:
   tracker:
-    - ['create', 'UA-1234567-1', 'auto']  # default account [required]
-    - ['create', 'UA-1237654-1', 'auto', {'name':'MyOtherTracker'}] # add secondary tracker
+    - ['config', 'UA-1234567-1']          # default account [required]
+    - ['config', 'UA-1234567-1']          # add secondary tracker
     - ['set', 'forceSSL', true]           # force tracking to use SSL
     - ['require', 'ecommerce', 'ecommerce.js']  # load ecommerce extension
-  global_name: 'myGATracker'              # set a different tracker function name (defaults to "ga")
   track_links: false                      # disable external link / asset tracking
   ignore_link_class:  "notrack"           # if "track_links", then ignore external links with the "notrack" class
   compress_js: false                      # do not compress inline JavaScript
+  primary_gtag_id: "UA-1234567-1"         # set the default tracking id to be used when loading gtag (defaults to the first tracker)
 ```
 
 Please refer to the [Configuration.md](docs/en/Configuration.md) for all configuration options.
