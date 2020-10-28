@@ -59,7 +59,7 @@ The syntax is very similar to the official documentation, so things like seconda
 Axllent\AnalyticsJS\AnalyticsJS:
   tracker:
     - ['config', 'UA-1234567-1']          # default account [required]
-    - ['config', 'UA-1234567-1']          # add secondary tracker
+    - ['config', 'UA-1234567-2']          # add secondary tracker
     - ['set', 'forceSSL', true]           # force tracking to use SSL
     - ['require', 'ecommerce', 'ecommerce.js']  # load ecommerce extension
   track_links: false                      # disable external link / asset tracking

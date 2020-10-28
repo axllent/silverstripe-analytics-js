@@ -204,7 +204,6 @@ class AnalyticsJS extends Extension
             if ($conf[0] == 'config' || $conf[0] == 'create') {
                 // Check if config has already been set (or _config.php has been run a second time)
                 if (isset($this->ga_configs[$conf[1]])) {
-                    // no unique name has been specified for additional tracker
                     if ($this->ga_configs[$conf[1]] != $conf[1]) {
                         user_error('Tracker "' . $conf[1] . '" already set', E_USER_WARNING);
 
