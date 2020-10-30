@@ -1,7 +1,7 @@
 (function(){
 	function _guaLt(e) {
 		/* If GA is blocked or not loaded, or not main|middle|touch click then don't track */
-		if (!{$GlobalName}.hasOwnProperty("loaded") || 1 != {$GlobalName}.loaded || (e.which != 1 && e.which != 2)) {
+		if (!ga.hasOwnProperty("loaded") || 1 != ga.loaded || (e.which != 1 && e.which != 2)) {
 			return;
 		}
 

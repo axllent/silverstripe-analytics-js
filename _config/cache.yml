@@ -1,8 +1,0 @@
----
-Name: analyticsjscache
----
-SilverStripe\Core\Injector\Injector:
-  Psr\SimpleCache\CacheInterface.analyticsJs:
-    factory: SilverStripe\Core\Cache\CacheFactory
-    constructor:
-      namespace: 'analyticsjs'
