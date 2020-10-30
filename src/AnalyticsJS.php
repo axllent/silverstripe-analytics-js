@@ -3,9 +3,8 @@ namespace Axllent\AnalyticsJS;
 
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
-use SilverStripe\Core\Extension;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\ORM\FieldType\DBField;
+use SilverStripe\Core\Extension;
 use SilverStripe\View\ArrayData;
 use SilverStripe\View\Requirements;
 
@@ -92,8 +91,8 @@ class AnalyticsJS extends Extension
     private static $page_error_category = 'Page Error';
 
     /**
-     * The primary tracking id for the gtag script
-     * 
+     * The primary tracking id for the gtag script, defaults to first
+     *
      * @config
      */
     private static $primary_gtag_id = '';
@@ -132,23 +131,6 @@ class AnalyticsJS extends Extension
      * @var int
      */
     protected $tracker_counter = 1;
-    
-    /**
-     * GTAG tracking id
-     * 
-     * @var string
-     */
-    protected $gtag_id = '';
-    
-    /**
-     * Casting
-     *
-     * @var array
-     */
-    private static $casting = [
-        'CallbackTrackers'    => 'HTMLText',
-        'NonCallbackTrackers' => 'HTMLText',
-    ];
 
     /**
      * Automatically initiate the code
@@ -176,11 +158,9 @@ class AnalyticsJS extends Extension
      */
     protected function parseAnalyticsConfigs()
     {
-        // Check in place for old configs
-        $this->_testForDeprecatedConfigs();
-
+        $c = Config::inst();
         // Set trackers from yaml
-        if ($trackers = Config::inst()->get(self::class, 'tracker')) {
+        if ($trackers = $c->get(self::class, 'tracker')) {
             foreach ($trackers as $tracker) {
                 array_push($this->tracker_config, $tracker);
             }
@@ -191,7 +171,7 @@ class AnalyticsJS extends Extension
             return false;
         }
 
-        $track_in_dev_mode = Config::inst()->get(self::class, 'track_in_dev_mode');
+        $track_in_dev_mode = $c->get(self::class, 'track_in_dev_mode');
 
         $skip_tracking = (
             (!Director::isLive() && !$track_in_dev_mode) ||
@@ -202,10 +182,12 @@ class AnalyticsJS extends Extension
             $args = [];
 
             if ($conf[0] == 'config' || $conf[0] == 'create') {
-                // Check if config has already been set (or _config.php has been run a second time)
                 if (isset($this->ga_configs[$conf[1]])) {
                     if ($this->ga_configs[$conf[1]] != $conf[1]) {
-                        user_error('Tracker "' . $conf[1] . '" already set', E_USER_WARNING);
+                        user_error(
+                            'Tracker "' . $conf[1] . '" already set',
+                            E_USER_WARNING
+                        );
 
                         return false;
                     }
@@ -239,7 +221,11 @@ class AnalyticsJS extends Extension
                         $conf[] = $extraConfig;
                     }
 
-                    user_error('Tracker "' . $conf[1] . '" automatically migrated, you should update your tracking config', E_USER_DEPRECATED);
+                    user_error(
+                        'Tracker "' . $conf[1] . '" automatically migrated, ' .
+                        'you should update your tracking config',
+                        E_USER_DEPRECATED
+                    );
                 }
 
                 // Replace Tracker IDs with fake ones if not in LIVE mode
@@ -253,11 +239,10 @@ class AnalyticsJS extends Extension
 
                 array_push($this->tracker_names, $conf[1]);
             }
-            
-            if (Config::inst()->get(self::class, 'primary_gtag_id')) {
-                $this->gtag_id = Config::inst()->get(self::class, 'primary_gtag_id');
-            } else {
-                $this->gtag_id = $this->tracker_names[0];
+
+            if (!$c->get(self::class, 'primary_gtag_id')) {
+                Config::modify()
+                    ->set(self::class, 'primary_gtag_id', $this->tracker_names[0]);
             }
 
             foreach ($conf as $i) {
@@ -276,6 +261,7 @@ class AnalyticsJS extends Extension
      */
     protected function genAnalyticsCodeTrackingCode()
     {
+        $c = Config::inst();
         if (count($this->tracker_names) == 0) {
             return false;
         }
@@ -286,19 +272,25 @@ class AnalyticsJS extends Extension
 
         if ($ErrorCode) {
             $ecode = ($ErrorCode == 404) ?
-            Config::inst()->get(self::class, 'page_404_category')
-            : $ErrorCode . Config::inst()->get(self::class, 'page_error_category');
-
-            foreach ($this->tracker_names as $t) {
-                $ga_insert .= 'gtag("event","' . $ecode . '",{"send_to":"' . $t . '"});' . "\n";
-            }
+            $c->get(self::class, 'page_404_category')
+            : $ErrorCode . $c->get(self::class, 'page_error_category');
+            // track error as event
+            $ga_insert .= 'gtag("event",' .
+                'window.location.pathname+window.location.search,{' .
+                '"event_category":"' . $ecode . '",' .
+                '"event_label":window.referrer});' . "\n";
         }
-        
-        Requirements::insertHeadTags('<script async src="https://www.googletagmanager.com/gtag/js?id=' . urlencode($this->gtag_id) . '"></script>', 'analyticsjs-gtag');
+
+        Requirements::insertHeadTags(
+            '<script async src="https://www.googletagmanager.com/gtag/js?id=' .
+            urlencode($c->get(self::class, 'primary_gtag_id')) .
+            '"></script>',
+            'analyticsjs-gtag'
+        );
 
         $headerscript = "window.dataLayer = window.dataLayer || [];\n" .
         "function gtag(){dataLayer.push(arguments);}\n" .
-        "gtag('js', new Date());\n" .
+        "gtag('js',new Date());\n" .
         $this->ga_trackers . $ga_insert;
 
         Requirements::insertHeadTags(
@@ -314,30 +306,21 @@ class AnalyticsJS extends Extension
      */
     protected function genLinkTrackingCode()
     {
+        $c = Config::inst();
         if (count($this->tracker_names) == 0
-            || !Config::inst()->get(self::class, 'track_links')
+            || !$c->get(self::class, 'track_links')
         ) {
             return false;
-        }
-
-        $non_callback_trackers = '';
-        $callback_trackers     = '';
-
-        foreach ($this->tracker_names as $t) {
-            $non_callback_trackers .= 'gtag("event",{"send_to":"' . $t . '","event_category":c,"event_action":a,"event_label":l});';
-            $callback_trackers .= 'gtag("event",{"send_to":"' . $t . '","event_category":c,"event_action":a,"event_label":l,"event_callback":hb});';
         }
 
         $js = $this->owner->customise(
             ArrayData::create(
                 [
-                    'CallbackTrackers'    => DBField::create_field('HTMLText', $callback_trackers),
-                    'NonCallbackTrackers' => DBField::create_field('HTMLText', $non_callback_trackers),
-                    'LinkCategory'        => Config::inst()->get(self::class, 'link_category'),
-                    'EmailCategory'       => Config::inst()->get(self::class, 'email_category'),
-                    'PhoneCategory'       => Config::inst()->get(self::class, 'phone_category'),
-                    'DownloadsCategory'   => Config::inst()->get(self::class, 'downloads_category'),
-                    'IgnoreClass'         => Config::inst()->get(self::class, 'ignore_link_class'),
+                    'LinkCategory'      => $c->get(self::class, 'link_category'),
+                    'EmailCategory'     => $c->get(self::class, 'email_category'),
+                    'PhoneCategory'     => $c->get(self::class, 'phone_category'),
+                    'DownloadsCategory' => $c->get(self::class, 'downloads_category'),
+                    'IgnoreClass'       => $c->get(self::class, 'ignore_link_class'),
                 ]
             )
         )->renderWith('OutboundLinkTracking');
@@ -355,7 +338,7 @@ class AnalyticsJS extends Extension
     protected function compressGUACode($data)
     {
         $repl = [
-            '!/\*[^*]*\*+([^/][^*]*\*+)*/!' => '', // Comments
+            '!/\*[^*]*\*+([^/][^*]*\*+)*/!' => '', // strip comments
             '/(    |\n|\t)/'                => '', // soft tabs / new lines
             '/\s?=\s?/'                     => '=',
             '/\s?==\s?/'                    => '==',
@@ -375,20 +358,5 @@ class AnalyticsJS extends Extension
         return Config::inst()->get(self::class, 'compress_js')
         ? preg_replace(array_keys($repl), array_values($repl), $data)
         : $data;
-    }
-
-    /**
-     * Test for deprecated yaml configs when upgrading from 3 -> 4
-     *
-     * @return void
-     */
-    private function _testForDeprecatedConfigs()
-    {
-        if (Director::isDev()) {
-            $conf = Config::inst()->get('AnalyticsJS', 'tracker');
-            if ($conf) {
-                user_error('Update your "AnalyticsJS" yaml configs to use "Axllent\AnalyticsJS\AnalyticsJS"', E_USER_DEPRECATED);
-            }
-        }
     }
 }

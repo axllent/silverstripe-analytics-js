@@ -53,7 +53,7 @@
 			if (c) {
 				if (t) {
 					/* link opens a new window already - just track */
-					$NonCallbackTrackers
+					gtag("event",a,{"event_category":c,"event_label":l});
 				} else {
 					/* link opens in same window & requires callback */
 
@@ -70,8 +70,8 @@
 						window.location.href = h;
 					};
 
-					/* Add GA tracker(s) */
-					$CallbackTrackers
+					/* link opens in same window - track then open link */
+					gtag("event",a,{"event_category":c,"event_label":l,"event_callback":hb});
 
 					/* Run hitCallback function if GA takes too long (1 second) */
 					setTimeout(hb,1000);
