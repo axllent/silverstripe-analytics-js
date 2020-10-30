@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [dev]
+
+- Migrate from analytics.js to gtag.js (big thanks to @UndefinedOffset for the heavy lifting!)
+
+
 ## [3.1.6]
 
 - Use `https://www.google-analytics.com/analytics.js` not `//www.google-analytics.com/analytics.js`
