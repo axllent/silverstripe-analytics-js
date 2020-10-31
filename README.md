@@ -39,11 +39,6 @@ You can install it via composer with
 ```
 composer require axllent/silverstripe-analytics-js
 ```
-#### Guzzle for caching (optional)
-If you require local caching of Google Analytics, then you must have Guzzle installed too.
-```
-composer require guzzlehttp/guzzle
-```
 
 ## Basic usage
 
