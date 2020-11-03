@@ -2,9 +2,10 @@
 
 Notable changes to this project will be documented in this file.
 
-## [dev]
+## [4.0.0]
 
-- Migrate from analytics.js to gtag.js (big thanks to @UndefinedOffset for the heavy lifting!)
+- Migrate from `analytics.js` to `gtag.js` (big thanks to @UndefinedOffset for the heavy lifting!)
+- Rewrite sections of code, improve PSR2
 
 
 ## [3.1.6]
