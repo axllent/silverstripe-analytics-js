@@ -231,7 +231,7 @@ class AnalyticsJS extends Extension
                 // Replace Tracker IDs with fake ones if not in LIVE mode
                 if ($skip_tracking) {
                     $conf[1] = preg_replace(
-                        '/[0-9]{4,}-[0-9]+/',
+                        '/([0-9]{4,}-[0-9]+)|((?!=G-)[0-9A-Z]{10,})/',
                         'DEV-' . $this->tracker_counter++,
                         $conf[1]
                     );
