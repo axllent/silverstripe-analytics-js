@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [4.0.2]
+
+- Bugfix: Fixed issue where GA4 keys were not being swapped out in non-live modes
+
+
 ## [4.0.1]
 
 - Properly detect if GA is not loaded
