@@ -1,4 +1,4 @@
-# Google Universal Analytics (gtag.js) for Silverstripe
+# Google Universal Analytics for Silverstripe
 
 An extension to add Google **Universal Analytics** `gtag()` tracking code (not to be confused with Google Tag Manager) to your Silverstripe templates.
 
@@ -27,7 +27,7 @@ Event category names (eg: "Outgoing Links", "Downloads" etc) can be configured i
 
 ## Requirements
 
-- Silverstripe 4.*
+- Silverstripe ^4 || ^5
 
 For the deprecated `analytics.js` tracking method for Silverstripe 4, please refer to the [analytics.js branch](https://github.com/axllent/silverstripe-analytics-js/tree/3-analyticsjs).
 

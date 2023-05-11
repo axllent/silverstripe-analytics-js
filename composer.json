@@ -1,6 +1,6 @@
 {
     "name": "axllent/silverstripe-analytics-js",
-    "description": "Google Universal Analytics.js tracking code for SilverStripe",
+    "description": "Google Universal Analytics tracking code for Silverstripe",
     "type": "silverstripe-vendormodule",
     "homepage": "https://github.com/axllent/silverstripe-analytics-js",
     "keywords": [
@@ -20,7 +20,7 @@
         "issues": "https://github.com/axllent/silverstripe-analytics-js/issues"
     },
     "require": {
-        "silverstripe/framework": "^4.0 | ^5.0"
+        "silverstripe/framework": "^4.0 || ^5.0"
     },
     "autoload": {
         "psr-4": {
