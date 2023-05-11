@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [4.0.3]
+
+- Allow install on Silverstripe 5
+
+
 ## [4.0.2]
 
 - Bugfix: Fixed issue where GA4 keys were not being swapped out in non-live modes
