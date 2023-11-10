@@ -1,4 +1,5 @@
 <?php
+
 namespace Axllent\AnalyticsJS;
 
 use SilverStripe\Control\Controller;
@@ -17,7 +18,6 @@ use SilverStripe\View\Requirements;
  * License: MIT-style license http://opensource.org/licenses/MIT
  * Authors: Techno Joy development team (www.technojoy.co.nz)
  */
-
 class AnalyticsJS extends Extension
 {
     /**
@@ -167,21 +167,21 @@ class AnalyticsJS extends Extension
         }
 
         // Return false if no trackers are set
-        if (count($this->tracker_config) == 0) {
+        if (0 == count($this->tracker_config)) {
             return false;
         }
 
         $track_in_dev_mode = $c->get(self::class, 'track_in_dev_mode');
 
         $skip_tracking = (
-            (!Director::isLive() && !$track_in_dev_mode) ||
-            isset($_GET['flush'])
+            (!Director::isLive() && !$track_in_dev_mode)
+            || isset($_GET['flush'])
         ) ? true : false;
 
         foreach ($this->tracker_config as $conf) {
             $args = [];
 
-            if ($conf[0] == 'config' || $conf[0] == 'create') {
+            if ('config' == $conf[0] || 'create' == $conf[0]) {
                 if (isset($this->ga_configs[$conf[1]])) {
                     if ($this->ga_configs[$conf[1]] != $conf[1]) {
                         user_error(
@@ -193,17 +193,16 @@ class AnalyticsJS extends Extension
                     }
 
                     return false;
-                } else {
-                    $this->ga_configs[$conf[1]] = $conf[1];
                 }
+                $this->ga_configs[$conf[1]] = $conf[1];
 
                 // Backwards compatibility
-                if ($conf[0] == 'create') {
+                if ('create' == $conf[0]) {
                     $conf[0] = 'config';
 
                     $extraConfig = [];
                     if (isset($conf[2]) && is_string($conf[2])) {
-                        if ($conf[2] != 'auto') {
+                        if ('auto' != $conf[2]) {
                             $extraConfig['cookie_domain'] = $conf[2];
                         }
 
@@ -262,18 +261,18 @@ class AnalyticsJS extends Extension
     protected function genAnalyticsCodeTrackingCode()
     {
         $c = Config::inst();
-        if (count($this->tracker_names) == 0) {
+        if (0 == count($this->tracker_names)) {
             return false;
         }
 
         $ga_insert = false;
 
-        $ErrorCode = Controller::curr()->ErrorCode;
+        $errorCode = Controller::curr()->ErrorCode;
 
-        if ($ErrorCode) {
-            $ecode = ($ErrorCode == 404) ?
+        if ($errorCode) {
+            $ecode = 404 == $errorCode ?
             $c->get(self::class, 'page_404_category')
-            : $ErrorCode . $c->get(self::class, 'page_error_category');
+            : $errorCode . $c->get(self::class, 'page_error_category');
             // track error as event
             $ga_insert .= 'gtag("event",' .
                 'window.location.pathname+window.location.search,{' .
@@ -295,7 +294,8 @@ class AnalyticsJS extends Extension
 
         Requirements::insertHeadTags(
             '<script type="text/javascript">//<![CDATA[' . "\n" .
-            $this->compressGUACode($headerscript) . "\n" . '//]]></script>'
+            $this->compressGUACode($headerscript) . "\n" . '//]]></script>',
+            'analyticsjs-header'
         );
     }
 
@@ -307,9 +307,7 @@ class AnalyticsJS extends Extension
     protected function genLinkTrackingCode()
     {
         $c = Config::inst();
-        if (count($this->tracker_names) == 0
-            || !$c->get(self::class, 'track_links')
-        ) {
+        if (0 == count($this->tracker_names) || !$c->get(self::class, 'track_links')) {
             return false;
         }
 
@@ -325,7 +323,7 @@ class AnalyticsJS extends Extension
             )
         )->renderWith('OutboundLinkTracking');
 
-        Requirements::customScript($this->compressGUACode($js));
+        Requirements::customScript($this->compressGUACode($js), 'analyticsjs-footer');
     }
 
     /**
