@@ -7,7 +7,7 @@ use SilverStripe\Core\Config\Config;
 class AnalyticsJSTest extends FunctionalTest
 {
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         Config::inst()->update('Axllent\AnalyticsJS\AnalyticsJS', 'tracker', [['create','UA-DEV-1','auto']]);
