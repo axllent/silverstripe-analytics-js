@@ -42,7 +42,7 @@ composer require axllent/silverstripe-analytics-js
 
 ## Basic usage
 
-Once installed the extension is automatically loaded if you provide at least one tracking account in your config yaml file (eg) `mysite/_config/analytics.yml`
+Once installed the extension is automatically loaded if you provide at least one tracking account in your config yaml file (eg) `app/_config/analytics.yml`
 
 ```yaml
 Axllent\AnalyticsJS\AnalyticsJS:
