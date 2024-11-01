@@ -2,6 +2,12 @@
 
 Notable changes to this project will be documented in this file.
 
+## [4.0.4]
+
+- Add void return type for PHP 8 compatibility with Functional Test
+- Add script uniqueness ids
+
+
 ## [4.0.3]
 
 - Allow install on Silverstripe 5
