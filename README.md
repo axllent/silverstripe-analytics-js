@@ -1,5 +1,8 @@
 # Google Universal Analytics for Silverstripe
 
+### **Please note** that the functionality provided by this module is now fairly redundant since the release of Google Analytics 4 (GA4), and is no longer in active development.
+If you're looking for an alternative then take a look at [springtimesoft/silverstripe-tracking-scripts](https://github.com/springtimesoft/silverstripe-tracking-scripts).
+
 An extension to add Google **Universal Analytics** `gtag()` tracking code (not to be confused with Google Tag Manager) to your Silverstripe templates.
 
 It automatically includes optional unobtrusive **event tracking** for all outbound links & "asset downloads", as well as event tracking for 404 and error pages, email & telephone links.
