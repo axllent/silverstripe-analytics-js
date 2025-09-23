@@ -5,7 +5,7 @@
 ```yaml
 Axllent\AnalyticsJS\AnalyticsJS:
   tracker:
-    - ['config', 'UA-1234567-1']
+    - ['config', 'G-XXXXXXXX']
 ```
 
 
@@ -25,5 +25,5 @@ Axllent\AnalyticsJS\AnalyticsJS:
   page_404_category:   "Page Not Found"      # 404 page category name for GA event logging
   page_error_category: "Page Error"          # Error page category (not 404) for GA event logging
   track_in_dev_mode:   true                  # Allow live tracking in dev/staging mode
-  primary_gtag_id: "UA-1234567-1"            # Set the default tracking id to be used when loading gtag (defaults to the first tracker)
+  primary_gtag_id: "G-XXXXXXXX"            # Set the default tracking id to be used when loading gtag (defaults to the first tracker)
 ```
